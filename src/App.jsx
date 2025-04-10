@@ -1,12 +1,17 @@
-import { JsonForms } from "@jsonforms/react";
+/* import { JsonForms } from "@jsonforms/react";
 import {
   materialCells,
   materialRenderers,
 } from "@jsonforms/material-renderers";
 import { CssBaseline, Container, Typography, Paper, Box } from "@mui/material";
 import { schema, uiSchema, initialData } from "./formConfig";
+import Playground from "./Playground";
 
 function App() {
+  return <Playground />;
+}
+
+/* function App() {
   return (
     <>
       <CssBaseline />
@@ -41,6 +46,15 @@ function App() {
       </Box>
     </>
   );
+} 
+
+export default App;
+ */
+
+import Playground from "./pages/playground";
+
+function App() {
+  return <Playground />;
 }
 
 export default App;
