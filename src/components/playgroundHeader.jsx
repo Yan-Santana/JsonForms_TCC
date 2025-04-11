@@ -1,26 +1,22 @@
 import { Box, Typography, FormControl, Select, MenuItem, Button } from '@mui/material';
 
 const PlaygroundHeader = ({ examples, selected, onSelect }) => {
-  /*   const handleSubmit = async () => {
-    try {
-      const response = await fetch("http://seu-backend.com/api/rota", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ selectedExample: selected }),
-      });
+  const handleSubmit = async () => {
+    const response = await fetch('http://localhost:3001/submit-form', {
+      method: 'POST', // TESTE TESTE
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user: 'usuario_teste',
+        group: 'A',
+        formData: window.formData || {},
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Erro ao enviar dados para o backend");
-      }
-
-      const data = await response.json();
-      console.log("Resposta do backend:", data);
-    } catch (error) {
-      console.error("Erro:", error);
-    }
-  }; */
+    const result = await response.json();
+    console.log(result.message);
+  };
 
   return (
     <Box display='flex' alignItems='center' justifyContent='space-between' mb={2}>
@@ -52,7 +48,7 @@ const PlaygroundHeader = ({ examples, selected, onSelect }) => {
       </FormControl>
       <FormControl size='small' sx={{ minWidth: 150 }}>
         <Button
-          //onClick={handleSubmit}
+          onClick={handleSubmit}
           sx={{
             backgroundColor: '#28a745',
             color: '#ffffff',
