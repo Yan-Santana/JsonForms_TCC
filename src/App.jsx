@@ -51,7 +51,7 @@ function App() {
 export default App;
  */
 
-import Playground from "./pages/playground";
+import Playground from './pages/playground';
 
 function App() {
   return <Playground />;

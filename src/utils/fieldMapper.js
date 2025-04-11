@@ -1,63 +1,62 @@
 // FieldMapperExample.js
 
 export const FieldMapperExample = {
-  name: "Field Mapper Example",
+  name: 'Field Mapper Example',
   schema: {
-    type: "array",
+    type: 'array',
     items: {
-      type: "object",
+      type: 'object',
       properties: {
         source: {
-          type: "array",
+          type: 'array',
           items: {
-            type: "string",
+            type: 'string',
             oneOf: [
-              { title: "My_First_Name__c", const: "My_First_Name__c" },
-              { title: "My_Last_Name__c", const: "My_Last_Name__c" },
-              { title: "My_Email__c", const: "My_Email__c" },
-              { title: "My_Phone__c", const: "My_Phone__c" },
+              { title: 'My_First_Name__c', const: 'My_First_Name__c' },
+              { title: 'My_Last_Name__c', const: 'My_Last_Name__c' },
+              { title: 'My_Email__c', const: 'My_Email__c' },
+              { title: 'My_Phone__c', const: 'My_Phone__c' },
             ],
           },
         },
         concatenationCharacter: {
-          type: "string",
-          description:
-            "If you select multiple source fields, concatenate them with this character",
+          type: 'string',
+          description: 'If you select multiple source fields, concatenate them with this character',
         },
         destination: {
-          type: "string",
+          type: 'string',
           oneOf: [
-            { title: "Full Name", const: "fullname" },
-            { title: "Email Address", const: "email" },
-            { title: "Phone Number", const: "phn" },
+            { title: 'Full Name', const: 'fullname' },
+            { title: 'Email Address', const: 'email' },
+            { title: 'Phone Number', const: 'phn' },
           ],
         },
       },
-      required: ["source", "destination"],
+      required: ['source', 'destination'],
     },
   },
   uischema: {
-    type: "Control",
-    label: "Salesforce Lead <> Acme Sale Field Mapper",
-    scope: "#",
+    type: 'Control',
+    label: 'Salesforce Lead <> Acme Sale Field Mapper',
+    scope: '#',
     options: {
-      layout: "Accordion",
-      elementLabelProp: "destination",
+      layout: 'Accordion',
+      elementLabelProp: 'destination',
       detail: {
-        type: "VerticalLayout",
+        type: 'VerticalLayout',
         elements: [
           {
-            type: "Group",
-            label: "Source Field(s)",
+            type: 'Group',
+            label: 'Source Field(s)',
             elements: [
               {
-                type: "Control",
-                scope: "#/properties/source",
-                label: "Source Fields",
+                type: 'Control',
+                scope: '#/properties/source',
+                label: 'Source Fields',
               },
               {
-                type: "Control",
-                scope: "#/properties/concatenationCharacter",
+                type: 'Control',
+                scope: '#/properties/concatenationCharacter',
                 options: {
                   showUnfocusedDescription: true,
                 },
@@ -65,12 +64,12 @@ export const FieldMapperExample = {
             ],
           },
           {
-            type: "Group",
-            label: "Destination Field",
+            type: 'Group',
+            label: 'Destination Field',
             elements: [
               {
-                type: "Control",
-                scope: "#/properties/destination",
+                type: 'Control',
+                scope: '#/properties/destination',
                 options: {
                   autocomplete: true,
                 },
@@ -83,13 +82,13 @@ export const FieldMapperExample = {
   },
   data: [
     {
-      source: ["My_First_Name__c", "My_Last_Name__c"],
-      concatenationCharacter: " ",
-      destination: "fullname",
+      source: ['My_First_Name__c', 'My_Last_Name__c'],
+      concatenationCharacter: ' ',
+      destination: 'fullname',
     },
     {
-      source: ["My_Email__c"],
-      destination: "email",
+      source: ['My_Email__c'],
+      destination: 'email',
     },
   ],
 };

@@ -1,21 +1,21 @@
 export const SimpleExample = {
-  name: "Simple Example",
+  name: 'Simple Example',
   schema: {
-    type: "object",
+    type: 'object',
     properties: {
-      name: { type: "string" },
-      age: { type: "number" },
+      name: { type: 'string' },
+      age: { type: 'number' },
     },
-    required: ["name"],
+    required: ['name'],
   },
   uischema: {
-    type: "VerticalLayout",
+    type: 'VerticalLayout',
     elements: [
-      { type: "Control", scope: "#/properties/name" },
-      { type: "Control", scope: "#/properties/age" },
+      { type: 'Control', scope: '#/properties/name' },
+      { type: 'Control', scope: '#/properties/age' },
     ],
   },
-  data: { name: "", age: 0 },
+  data: { name: '', age: 0 },
 };
 
 export default SimpleExample;

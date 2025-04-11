@@ -1,90 +1,90 @@
 export const schema = {
   properties: {
-    enableBidirectionalSync: { type: "boolean" },
+    enableBidirectionalSync: { type: 'boolean' },
     recordsToSync: {
-      type: "array",
+      type: 'array',
       items: {
-        type: "string",
-        enum: ["Conta", "Contato", "Oportunidade"],
+        type: 'string',
+        enum: ['Conta', 'Contato', 'Oportunidade'],
       },
     },
     country: {
-      type: "string",
-      enum: ["Estados Unidos", "Canadá", "Índia", "Austrália"],
+      type: 'string',
+      enum: ['Estados Unidos', 'Canadá', 'Índia', 'Austrália'],
     },
     nomeCompleto: {
-      type: "string",
-      title: "Nome Completo",
+      type: 'string',
+      title: 'Nome Completo',
     },
     email: {
-      type: "string",
-      format: "email",
-      title: "E-mail",
+      type: 'string',
+      format: 'email',
+      title: 'E-mail',
     },
     idade: {
-      type: "integer",
+      type: 'integer',
       minimum: 0,
-      title: "Idade",
+      title: 'Idade',
     },
     receber: {
-      type: "boolean",
-      title: "Receber?",
+      type: 'boolean',
+      title: 'Receber?',
     },
     interesses: {
-      type: "array",
+      type: 'array',
       minItems: 1,
       items: {
-        type: "string",
-        enum: ["Tecnologia", "Jogos", "Música", "Esportes", "Livros"],
+        type: 'string',
+        enum: ['Tecnologia', 'Jogos', 'Música', 'Esportes', 'Livros'],
       },
-      title: "Interesses",
+      title: 'Interesses',
     },
-    convertToUSD: { type: "boolean" },
+    convertToUSD: { type: 'boolean' },
   },
-  required: ["country", "nomeCompleto"],
+  required: ['country', 'nomeCompleto'],
 };
 
 export const uiSchema = {
-  type: "VerticalLayout",
+  type: 'VerticalLayout',
   elements: [
     {
-      type: "Group",
-      label: "Sincronização Bidirecional de Dados",
+      type: 'Group',
+      label: 'Sincronização Bidirecional de Dados',
 
       elements: [
         {
-          type: "Control",
-          scope: "#/properties/nomeCompleto",
+          type: 'Control',
+          scope: '#/properties/nomeCompleto',
         },
         {
-          type: "Control",
-          scope: "#/properties/email",
+          type: 'Control',
+          scope: '#/properties/email',
         },
         {
-          type: "Control",
-          scope: "#/properties/idade",
+          type: 'Control',
+          scope: '#/properties/idade',
         },
         {
-          type: "Control",
-          scope: "#/properties/receber",
+          type: 'Control',
+          scope: '#/properties/receber',
         },
         {
-          type: "Control",
-          scope: "#/properties/interesses",
+          type: 'Control',
+          scope: '#/properties/interesses',
         },
         {
-          type: "Control",
-          scope: "#/properties/enableBidirectionalSync",
-          label: "Sincronizar dados?",
+          type: 'Control',
+          scope: '#/properties/enableBidirectionalSync',
+          label: 'Sincronizar dados?',
         },
         {
-          type: "Control",
-          scope: "#/properties/recordsToSync",
-          label: "Tipos de registros para sincronizar",
+          type: 'Control',
+          scope: '#/properties/recordsToSync',
+          label: 'Tipos de registros para sincronizar',
           rule: {
-            effect: "HIDE",
+            effect: 'HIDE',
             condition: {
-              scope: "#/properties/enableBidirectionalSync",
+              scope: '#/properties/enableBidirectionalSync',
               schema: { const: false },
             },
           },
@@ -92,24 +92,24 @@ export const uiSchema = {
       ],
     },
     {
-      type: "Group",
-      label: "Configuração de Moeda",
+      type: 'Group',
+      label: 'Configuração de Moeda',
       elements: [
         {
-          type: "Control",
-          scope: "#/properties/country",
-          label: "País",
+          type: 'Control',
+          scope: '#/properties/country',
+          label: 'País',
         },
         {
-          type: "Control",
-          scope: "#/properties/convertToUSD",
-          label: "Converter para USD",
+          type: 'Control',
+          scope: '#/properties/convertToUSD',
+          label: 'Converter para USD',
           options: { toggle: true },
           rule: {
-            effect: "SHOW",
+            effect: 'SHOW',
             condition: {
-              scope: "#/properties/country",
-              schema: { not: { const: "Estados Unidos" } },
+              scope: '#/properties/country',
+              schema: { not: { const: 'Estados Unidos' } },
             },
           },
         },

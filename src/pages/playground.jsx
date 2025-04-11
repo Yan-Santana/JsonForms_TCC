@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Grid, Tabs, Tab, Paper } from "@mui/material";
-import PlaygroundHeader from "../components/playgroundHeader";
-import CodeEditor from "../components/editor";
-import FormPreview from "../components/formPreview";
-import TabPanel from "../components/tabPanel";
-import { examples } from "../utils/examples";
+import { useState } from 'react';
+import { Grid, Tabs, Tab, Paper } from '@mui/material';
+import PlaygroundHeader from '../components/playgroundHeader';
+import CodeEditor from '../components/editor';
+import FormPreview from '../components/formPreview';
+import TabPanel from '../components/tabPanel';
+import { examples } from '../utils/examples';
 
 const Playground = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -13,9 +13,7 @@ const Playground = () => {
   const current = examples.find((e) => e.name === selectedExample);
 
   const [schema, setSchema] = useState(JSON.stringify(current.schema, null, 2));
-  const [uischema, setUiSchema] = useState(
-    JSON.stringify(current.uischema, null, 2)
-  );
+  const [uischema, setUiSchema] = useState(JSON.stringify(current.uischema, null, 2));
   const [formData, setFormData] = useState(current.data);
 
   const handleChangeExample = (exampleName) => {
@@ -35,7 +33,7 @@ const Playground = () => {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div style={{ padding: '2rem' }}>
       <PlaygroundHeader
         examples={examples}
         selected={selectedExample}
@@ -48,11 +46,11 @@ const Playground = () => {
             <Tabs
               value={tabIndex}
               onChange={(e, newVal) => setTabIndex(newVal)}
-              variant="fullWidth"
+              variant='fullWidth'
             >
-              <Tab label="JSON Schema" />
-              <Tab label="UI Schema" />
-              <Tab label="Data" />
+              <Tab label='JSON Schema' />
+              <Tab label='UI Schema' />
+              <Tab label='Data' />
             </Tabs>
 
             <TabPanel value={tabIndex} index={0}>

@@ -1,11 +1,4 @@
-import {
-  Box,
-  Typography,
-  FormControl,
-  Select,
-  MenuItem,
-  Button,
-} from "@mui/material";
+import { Box, Typography, FormControl, Select, MenuItem, Button } from '@mui/material';
 
 const PlaygroundHeader = ({ examples, selected, onSelect }) => {
   /*   const handleSubmit = async () => {
@@ -30,28 +23,23 @@ const PlaygroundHeader = ({ examples, selected, onSelect }) => {
   }; */
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      mb={2}
-    >
-      <Typography variant="h5" fontWeight="bold">
+    <Box display='flex' alignItems='center' justifyContent='space-between' mb={2}>
+      <Typography variant='h5' fontWeight='bold'>
         JSON Form Playground
       </Typography>
-      <FormControl size="small" sx={{ minWidth: 200 }}>
+      <FormControl size='small' sx={{ minWidth: 200 }}>
         <Select
           value={selected}
           onChange={(e) => onSelect(e.target.value)}
           sx={{
-            backgroundColor: "#1351B4",
-            color: "#ffffff",
-            borderRadius: "8px",
-            "& .MuiSelect-icon": {
-              color: "#ffffff",
+            backgroundColor: '#1351B4',
+            color: '#ffffff',
+            borderRadius: '8px',
+            '& .MuiSelect-icon': {
+              color: '#ffffff',
             },
-            "&:hover": {
-              backgroundColor: "#002266",
+            '&:hover': {
+              backgroundColor: '#002266',
             },
           }}
         >
@@ -62,16 +50,16 @@ const PlaygroundHeader = ({ examples, selected, onSelect }) => {
           ))}
         </Select>
       </FormControl>
-      <FormControl size="small" sx={{ minWidth: 150 }}>
+      <FormControl size='small' sx={{ minWidth: 150 }}>
         <Button
           //onClick={handleSubmit}
           sx={{
-            backgroundColor: "#28a745",
-            color: "#ffffff",
-            borderRadius: "100px",
-            fontWeight: "bold",
-            "&:hover": {
-              backgroundColor: "#218838",
+            backgroundColor: '#28a745',
+            color: '#ffffff',
+            borderRadius: '100px',
+            fontWeight: 'bold',
+            '&:hover': {
+              backgroundColor: '#218838',
             },
           }}
         >
