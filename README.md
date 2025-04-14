@@ -14,15 +14,20 @@ Este projeto é um playground para experimentação e desenvolvimento com JsonFo
   - React Router DOM
 
 - **Backend**:
+  - Node.js
+  - Express
+  - TypeScript
+  - MongoDB
+  - Swagger
   - Docker
   - Docker Compose
-  - Node.js
 
 ## 📋 Pré-requisitos
 
 - Node.js (versão 18 ou superior)
 - Docker e Docker Compose
 - npm ou yarn
+- MongoDB (local ou Atlas)
 
 ## 🛠️ Instalação
 
@@ -32,25 +37,46 @@ Este projeto é um playground para experimentação e desenvolvimento com JsonFo
 git clone https://github.com/Yan-Santana/JsonForms_TCC.git
 ```
 
-2. Instale as dependências:
+2. Instale as dependências do frontend:
 
 ```bash
 npm install
 ```
 
-3. Configure as variáveis de ambiente:
+3. Instale as dependências do backend:
 
 ```bash
+cd backend
+npm install
+```
+
+4. Configure as variáveis de ambiente:
+
+```bash
+# Frontend
+cp .env.example .env
+
+# Backend
+cd backend
 cp .env.example .env
 ```
 
-4. Inicie o ambiente de desenvolvimento:
+5. Inicie o ambiente de desenvolvimento:
+
+Frontend:
 
 ```bash
 npm run dev
 ```
 
-5. Para desenvolvimento com Docker:
+Backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+6. Para desenvolvimento com Docker:
 
 ```bash
 docker-compose up
@@ -62,22 +88,33 @@ docker-compose up
 - Validação de dados baseada em JSON Schema
 - Interface visual para construção de formulários
 - Integração com Monaco Editor para edição de schemas
+- API REST com documentação Swagger
+- Autenticação de usuários
 
 ## 🧪 Scripts Disponíveis
+
+Frontend:
 
 - `npm run dev` - Inicia o servidor de desenvolvimento
 - `npm run build` - Gera a build de produção
 - `npm run lint` - Executa o linter
 - `npm run preview` - Previa a build de produção
 
+Backend:
+
+- `npm run dev` - Inicia o servidor em modo desenvolvimento
+- `npm run build` - Compila o TypeScript
+- `npm run start` - Inicia o servidor em produção
+- `npm run watch` - Compila o TypeScript em modo watch
+
 ## 📚 Documentação
 
-Para mais informações sobre JsonForms, consulte a [documentação oficial](https://jsonforms.io/).
+- [JsonForms](https://jsonforms.io/)
+- [Swagger UI](http://localhost:3001/api-docs) (disponível após iniciar o backend)
 
 ## 🤝 Contribuição
 
 Este projeto é parte de um trabalho de conclusão de curso (TCC). Contribuições são bem-vindas através de pull requests.
-
 
 ## 👨‍💻 Autor
 
