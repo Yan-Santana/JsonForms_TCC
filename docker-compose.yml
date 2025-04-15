@@ -1,26 +1,25 @@
-version: '3.8'
-
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '5173:5173'
+      - '4173:4173'
     volumes:
       - .:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=${VITE_API_URL}
+      - VITE_API_URL=http://localhost:5000
     depends_on:
       - backend
+    command: sh -c "npm run preview -- --host 0.0.0.0"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - '${BACKEND_PORT}:${BACKEND_PORT}'
+      - '5000:5000'
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -29,10 +28,11 @@ services:
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_DATABASE=${MONGO_DATABASE}
-      - PORT=${BACKEND_PORT}
+      - PORT=5000
       - NODE_ENV=${NODE_ENV}
     depends_on:
       - mongo
+    command: sh -c "npm run build && npm start"
 
   mongo:
     image: mongo:latest
@@ -44,6 +44,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
     volumes:
       - mongodb_data:/data/db
+    command: mongod --bind_ip_all
 
 volumes:
   mongodb_data:

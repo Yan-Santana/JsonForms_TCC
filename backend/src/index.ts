@@ -21,15 +21,15 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Routes
 app.use('/api/auth', authRoutes);
 
-// Database connection
-/* mongoose
-  .connect(process.env.MONGODB_URI || '')
+// Database connection¬
+mongoose
+  .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/jsonforms_analytics')
   .then(() => {
     console.log('Connected to MongoDB');
   })
   .catch((error) => {
-    console.error('MongoDB connection error:', error);
-  }); */
+    console.error('MongoDB connection ERROR:', error);
+  });
 
 // Start server
 app.listen(PORT, () => {
