@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import { User } from '../models/User';
+import { AppDataSource } from '../config/database';
 
 interface RegisterRequest extends Request {
   body: {
@@ -24,24 +25,23 @@ export const register = async (req: RegisterRequest, res: Response) => {
   try {
     const { firstName, lastName, email, password, group } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    const userRepository = AppDataSource.getRepository(User);
+    const existingUser = await userRepository.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ error: 'Email já está em uso' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({
-      firstName,
-      lastName,
+    const user = userRepository.create({
+      name: `${firstName} ${lastName}`,
       email,
       password: hashedPassword,
-      group,
     });
 
-    await user.save();
+    await userRepository.save(user);
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your-secret-key', {
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', {
       expiresIn: '24h',
     });
 
@@ -55,7 +55,8 @@ export const login = async (req: LoginRequest, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
@@ -65,7 +66,7 @@ export const login = async (req: LoginRequest, res: Response) => {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your-secret-key', {
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', {
       expiresIn: '24h',
     });
 

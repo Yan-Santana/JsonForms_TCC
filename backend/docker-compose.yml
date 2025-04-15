@@ -1,19 +1,4 @@
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - '4173:4173'
-    volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://localhost:5000
-    depends_on:
-      - backend
-    command: sh -c "npm run preview -- --host 0.0.0.0"
-
   backend:
     build:
       context: ./backend

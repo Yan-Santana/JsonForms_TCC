@@ -4,21 +4,24 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { User } from './User';
+import { Form } from './Form';
 
 @Entity()
-export class User {
+export class Submission {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
-  name!: string;
+  @Column('jsonb')
+  data!: any;
 
-  @Column({ unique: true })
-  email!: string;
+  @ManyToOne(() => User, (user) => user.id)
+  user!: User;
 
-  @Column()
-  password!: string;
+  @ManyToOne(() => Form, (form) => form.id)
+  form!: Form;
 
   @CreateDateColumn()
   createdAt!: Date;
