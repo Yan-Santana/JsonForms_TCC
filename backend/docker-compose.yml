@@ -1,12 +1,13 @@
 services:
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
+      container_name: jsonforms_analytics_backend
     ports:
       - '5000:5000'
     volumes:
-      - ./backend:/app
+      - .:/app
       - /app/node_modules
     environment:
       - POSTGRES_HOST=postgres
