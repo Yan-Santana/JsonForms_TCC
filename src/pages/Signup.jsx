@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import { authStyles } from '../styles/auth';
 
 const Signup = () => {
@@ -32,7 +32,7 @@ const Signup = () => {
     }
 
     try {
-      await axios.post('http://localhost:3001/api/auth/register', formData);
+      await api.post('/api/auth/register', formData);
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao criar usuário');

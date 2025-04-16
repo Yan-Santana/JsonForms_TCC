@@ -20,6 +20,13 @@ export class User {
   @Column()
   password!: string;
 
+  @Column({
+    type: 'enum',
+    enum: ['Grupo A', 'Grupo B'],
+    default: 'Grupo A',
+  })
+  group!: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

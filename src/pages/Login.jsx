@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import { authStyles } from '../styles/auth';
 
 const Login = () => {
@@ -23,7 +23,7 @@ const Login = () => {
     setError('');
 
     try {
-      await axios.post('http://localhost:3001/api/auth/login', formData);
+      await api.post('http://localhost:3001/api/auth/login', formData);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao fazer login');

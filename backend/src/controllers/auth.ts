@@ -37,6 +37,7 @@ export const register = async (req: RegisterRequest, res: Response) => {
       name: `${firstName} ${lastName}`,
       email,
       password: hashedPassword,
+      group,
     });
 
     await userRepository.save(user);
@@ -47,6 +48,7 @@ export const register = async (req: RegisterRequest, res: Response) => {
 
     res.status(201).json({ token });
   } catch (error) {
+    console.error('Erro ao registrar usuário:', error);
     res.status(500).json({ error: 'Erro ao criar usuário' });
   }
 };
@@ -72,6 +74,7 @@ export const login = async (req: LoginRequest, res: Response) => {
 
     res.json({ token });
   } catch (error) {
+    console.error('Erro ao fazer login:', error);
     res.status(500).json({ error: 'Erro ao fazer login' });
   }
 };
