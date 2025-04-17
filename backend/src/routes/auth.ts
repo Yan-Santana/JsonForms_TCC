@@ -5,43 +5,42 @@ const router = Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Autenticação
+ *   description: Endpoints de autenticação
+ */
+
+/**
+ * @swagger
  * /api/auth/register:
  *   post:
  *     summary: Registra um novo usuário
- *     tags: [usuário]
+ *     tags: [Autenticação]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - firstName
- *               - lastName
- *               - email
- *               - password
- *               - group
- *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *                 format: password
- *               group:
- *                 type: string
- *                 enum: [Grupo A, Grupo B]
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
  *       400:
- *         description: Email já está em uso
+ *         description: Email já está em uso ou dados inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erro ao criar usuário
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/register', register);
 
@@ -50,7 +49,7 @@ router.post('/register', register);
  * /api/auth/login:
  *   post:
  *     summary: Autentica um usuário
- *     tags: [usuário]
+ *     tags: [Autenticação]
  *     requestBody:
  *       required: true
  *       content:
@@ -64,16 +63,30 @@ router.post('/register', register);
  *               email:
  *                 type: string
  *                 format: email
+ *                 description: Email do usuário
  *               password:
  *                 type: string
  *                 format: password
+ *                 description: Senha do usuário
  *     responses:
  *       200:
  *         description: Login bem-sucedido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
  *       401:
  *         description: Credenciais inválidas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erro ao fazer login
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/login', login);
 

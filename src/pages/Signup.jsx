@@ -33,6 +33,7 @@ const Signup = () => {
 
     try {
       await api.post('/api/auth/register', formData);
+      alert('Cadastro realizado com sucesso! Você será redirecionado para a página de login.');
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao criar usuário');

@@ -11,8 +11,8 @@ import { Form } from './Form';
 
 @Entity()
 export class Submission {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn()
+  id!: number;
 
   @Column('jsonb')
   data!: any;

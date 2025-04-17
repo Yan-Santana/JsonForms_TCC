@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../config/api';
 import { authStyles } from '../styles/auth';
+import { login } from '../services/auth';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,13 +10,15 @@ const Login = () => {
     password: '',
   });
   const [error, setError] = useState('');
+  const [focusedInput, setFocusedInput] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -23,7 +26,8 @@ const Login = () => {
     setError('');
 
     try {
-      await api.post('http://localhost:3001/api/auth/login', formData);
+      const response = await api.post('/api/auth/login', formData);
+      login(response.data.token);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao fazer login');
@@ -46,13 +50,18 @@ const Login = () => {
               Email
             </label>
             <input
-              style={authStyles.input}
+              style={{
+                ...authStyles.input,
+                ...(focusedInput === 'email' && authStyles.inputFocus),
+              }}
               id='email'
               name='email'
               type='email'
               placeholder='seu@email.com'
               value={formData.email}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('email')}
+              onBlur={() => setFocusedInput('')}
               required
             />
           </div>
@@ -62,12 +71,17 @@ const Login = () => {
               Senha
             </label>
             <input
-              style={authStyles.input}
+              style={{
+                ...authStyles.input,
+                ...(focusedInput === 'password' && authStyles.inputFocus),
+              }}
               id='password'
               name='password'
               type='password'
               value={formData.password}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('password')}
+              onBlur={() => setFocusedInput('')}
               required
             />
           </div>
@@ -76,9 +90,11 @@ const Login = () => {
             type='submit'
             style={authStyles.button}
             onMouseOver={(e) =>
-              (e.target.style.backgroundColor = authStyles.buttonHover.backgroundColor)
+              (e.currentTarget.style.backgroundColor = authStyles.buttonHover.backgroundColor || '')
             }
-            onMouseOut={(e) => (e.target.style.backgroundColor = authStyles.button.backgroundColor)}
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = authStyles.button.backgroundColor || '')
+            }
           >
             Entrar →
           </button>
@@ -86,7 +102,22 @@ const Login = () => {
 
         <div style={authStyles.footer}>
           <span style={authStyles.footerText}>Não tem uma conta?</span>
-          <Link to='/signup' style={authStyles.link}>
+          <Link
+            to='/signup'
+            style={authStyles.link}
+            onMouseOver={(e) => {
+              e.currentTarget.style.textDecoration =
+                typeof authStyles.linkHover.textDecoration === 'string'
+                  ? authStyles.linkHover.textDecoration
+                  : 'none';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.textDecoration =
+                typeof authStyles.link.textDecoration === 'string'
+                  ? authStyles.link.textDecoration
+                  : 'none';
+            }}
+          >
             Criar conta
           </Link>
         </div>

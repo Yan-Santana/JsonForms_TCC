@@ -10,8 +10,8 @@ import { User } from './User';
 
 @Entity()
 export class Form {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn()
+  id!: number;
 
   @Column()
   title!: string;
