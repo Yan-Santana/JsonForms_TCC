@@ -1,5 +1,5 @@
 export const SimpleExample = {
-  name: 'Simple Example',
+  name: 'Exemplo Simples',
   schema: {
     type: 'object',
     properties: {

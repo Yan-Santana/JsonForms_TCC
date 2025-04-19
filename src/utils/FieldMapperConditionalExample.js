@@ -1,5 +1,5 @@
 export const SimpleConditionalExample = {
-  name: 'Example if/then/else',
+  name: 'Exemplo if/then/else',
   schema: {
     type: 'object',
     properties: {

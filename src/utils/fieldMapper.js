@@ -1,7 +1,7 @@
 // FieldMapperExample.js
 
 export const FieldMapperExample = {
-  name: 'Field Mapper Example',
+  name: 'Exemplo de Mapeamento de Campos',
   schema: {
     type: 'array',
     items: {
@@ -40,7 +40,6 @@ export const FieldMapperExample = {
     label: 'Salesforce Lead <> Acme Sale Field Mapper',
     scope: '#',
     options: {
-      layout: 'Accordion',
       elementLabelProp: 'destination',
       detail: {
         type: 'VerticalLayout',

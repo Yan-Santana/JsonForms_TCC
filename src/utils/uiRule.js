@@ -1,5 +1,5 @@
 export const UIRuleExample = {
-  name: 'UI Rule Example',
+  name: 'Exemplo de Regra Rule',
   schema: {
     type: 'object',
     properties: {
