@@ -3,6 +3,14 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 import { AppDataSource } from '../config/database';
+import { getRepository } from 'typeorm';
+
+// Estendendo o tipo Request para incluir user
+declare module 'express' {
+  interface Request {
+    user?: User;
+  }
+}
 
 interface RegisterRequest extends Request {
   body: {
@@ -19,6 +27,10 @@ interface LoginRequest extends Request {
     email: string;
     password: string;
   };
+}
+
+interface AuthenticatedRequest extends Request {
+  user?: User;
 }
 
 export const register = async (req: RegisterRequest, res: Response) => {
@@ -76,5 +88,18 @@ export const login = async (req: LoginRequest, res: Response) => {
   } catch (error) {
     console.error('Erro ao fazer login:', error);
     res.status(500).json({ error: 'Erro ao fazer login' });
+  }
+};
+
+export const getMe = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Usuário não autenticado' });
+    }
+    const { password, ...userWithoutPassword } = req.user;
+    return res.status(200).json(userWithoutPassword);
+  } catch (error) {
+    console.error('Erro ao buscar dados do usuário:', error);
+    return res.status(500).json({ message: 'Erro interno do servidor' });
   }
 };

@@ -2,16 +2,17 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { AppDataSource } from './config/database';
 import { setupSwaggerUI } from './config/swagger-ui';
-import { startServer } from './config/server';
 import { corsMiddleware, corsHeadersMiddleware } from './middlewares/cors';
 import { loggingMiddleware } from './middlewares/logging';
 import { errorMiddleware } from './middlewares/error';
 import authRoutes from './routes/auth';
+import formRoutes from './routes/form';
 
 // Carrega as variáveis de ambiente
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middlewares
 app.use(loggingMiddleware);
@@ -24,6 +25,7 @@ setupSwaggerUI(app);
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
+app.use('/api/form', formRoutes);
 
 // Rota de teste
 app.get('/api/test', (req, res) => {
@@ -37,13 +39,13 @@ app.get('/api/test', (req, res) => {
 // Middleware de erro global
 app.use(errorMiddleware);
 
-// Inicializa o banco de dados e inicia o servidor
-AppDataSource.initialize()
-  .then(() => {
-    console.log('Database connection established successfully');
-    startServer(app);
-  })
-  .catch((error) => {
-    console.error('Error during database initialization:', error);
+const startServer = async () => {
+  try {
+    await AppDataSource.initialize();
+    app.listen(PORT);
+  } catch (error) {
     process.exit(1);
-  });
+  }
+};
+
+startServer();

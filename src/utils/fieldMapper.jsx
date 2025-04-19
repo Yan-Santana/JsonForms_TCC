@@ -1,5 +1,3 @@
-// FieldMapperExample.js
-
 export const FieldMapperExample = {
   name: 'Exemplo de Mapeamento de Campos',
   schema: {
@@ -21,14 +19,14 @@ export const FieldMapperExample = {
         },
         concatenationCharacter: {
           type: 'string',
-          description: 'If you select multiple source fields, concatenate them with this character',
+          description: 'Se você selecionar múltiplos campos fonte, concatene-os com este caractere',
         },
         destination: {
           type: 'string',
           oneOf: [
-            { title: 'Full Name', const: 'fullname' },
-            { title: 'Email Address', const: 'email' },
-            { title: 'Phone Number', const: 'phn' },
+            { title: 'Nome Completo', const: 'fullname' },
+            { title: 'Endereço de Email', const: 'email' },
+            { title: 'Número de Telefone', const: 'phn' },
           ],
         },
       },
@@ -37,7 +35,7 @@ export const FieldMapperExample = {
   },
   uischema: {
     type: 'Control',
-    label: 'Salesforce Lead <> Acme Sale Field Mapper',
+    label: 'Mapeador de Campos Salesforce Lead <> Acme Sale',
     scope: '#',
     options: {
       elementLabelProp: 'destination',
@@ -46,12 +44,12 @@ export const FieldMapperExample = {
         elements: [
           {
             type: 'Group',
-            label: 'Source Field(s)',
+            label: 'Campo(s) Fonte',
             elements: [
               {
                 type: 'Control',
                 scope: '#/properties/source',
-                label: 'Source Fields',
+                label: 'Campos Fonte',
               },
               {
                 type: 'Control',
@@ -64,7 +62,7 @@ export const FieldMapperExample = {
           },
           {
             type: 'Group',
-            label: 'Destination Field',
+            label: 'Campo Destino',
             elements: [
               {
                 type: 'Control',
@@ -91,3 +89,5 @@ export const FieldMapperExample = {
     },
   ],
 };
+
+export default FieldMapperExample;

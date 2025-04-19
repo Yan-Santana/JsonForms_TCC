@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import Editor from '@monaco-editor/react';
 
-const CodeEditor = ({ value, onChange, height = '900px' }) => {
+const CodeEditor = ({ value, onChange, height = '870px' }) => {
   const monacoRef = useRef(null);
 
   const handleEditorDidMount = (editor) => {

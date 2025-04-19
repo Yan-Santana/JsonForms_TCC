@@ -1,7 +1,6 @@
 import { DataSource } from 'typeorm';
 import { User } from '../models/User';
-import { Form } from '../models/Form';
-import { Submission } from '../models/Submission';
+import { Form } from '../entities/Form';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -22,9 +21,9 @@ export const AppDataSource = new DataSource({
   username: POSTGRES_USER,
   password: POSTGRES_PASSWORD,
   database: POSTGRES_DB,
-  synchronize: NODE_ENV === 'development',
-  logging: NODE_ENV === 'development',
-  entities: [User, Form, Submission],
+  synchronize: true,
+  logging: true,
+  entities: [User, Form],
   subscribers: [],
   migrations: [],
   ssl: NODE_ENV === 'production',

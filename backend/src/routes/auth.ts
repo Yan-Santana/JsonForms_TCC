@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { register, login } from '../controllers/auth';
+import { register, login, getMe } from '../controllers/auth';
+import { authenticateToken } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -89,5 +91,27 @@ router.post('/register', register);
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/login', login);
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Retorna os dados do usuário autenticado
+ *     tags: [Autenticação]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados do usuário
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Não autorizado
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.get('/me', authenticateToken, (req: AuthenticatedRequest, res) => getMe(req, res));
 
 export default router;

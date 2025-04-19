@@ -27,6 +27,27 @@ export class User {
   })
   group!: string;
 
+  @Column({ default: 0 })
+  totalSubmissions!: number;
+
+  @Column({ default: 0 })
+  schemaEdits!: number;
+
+  @Column({ default: 0 })
+  uiSchemaEdits!: number;
+
+  @Column({ type: 'bigint', default: 0 })
+  totalTimeSpent!: number; // em milissegundos
+
+  @Column({ default: 0 })
+  errorCount!: number;
+
+  @Column({ default: 0 })
+  resetCount!: number;
+
+  @Column({ type: 'bigint', nullable: true })
+  firstAttemptTime!: number; // em milissegundos
+
   @CreateDateColumn()
   createdAt!: Date;
 

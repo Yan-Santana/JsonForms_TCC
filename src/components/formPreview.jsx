@@ -2,7 +2,17 @@ import { JsonForms } from '@jsonforms/react';
 import { materialRenderers, materialCells } from '@jsonforms/material-renderers';
 import { Paper, Typography, Box } from '@mui/material';
 
-const FormPreview = ({ schema, uischema, data, onChange }) => {
+const FormPreview = ({ schema, uischema, data, onChange, onFieldInteraction }) => {
+  const handleChange = ({ data, errors }) => {
+    // Se houver uma mudança em um campo específico, registrar a interação
+    const changedField = Object.keys(data).find((key) => data[key] !== onChange.data?.[key]);
+    if (changedField && onFieldInteraction) {
+      onFieldInteraction(changedField);
+    }
+
+    onChange(data);
+  };
+
   return (
     <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
       <Typography variant='h6' gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -13,7 +23,7 @@ const FormPreview = ({ schema, uischema, data, onChange }) => {
           schema={schema}
           uischema={uischema}
           data={data}
-          onChange={({ data }) => onChange(data)}
+          onChange={handleChange}
           renderers={materialRenderers}
           cells={materialCells}
         />

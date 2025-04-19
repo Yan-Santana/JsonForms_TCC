@@ -1,25 +1,148 @@
-import { Box, Typography, FormControl, Select, MenuItem, Button } from '@mui/material';
+import {
+  Box,
+  Typography,
+  FormControl,
+  Select,
+  MenuItem,
+  Button,
+  Snackbar,
+  Alert,
+} from '@mui/material';
 import { logout } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { STYLES, SNACKBAR_DURATION } from '../styles/headerStyles';
+import { validateFormData } from '../pages/formValidation.jsx';
 
-const PlaygroundHeader = ({ examples, selected, onSelect }) => {
+const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
   const navigate = useNavigate();
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserData(data);
+        } else {
+          if (response.status === 401) {
+            logout();
+            navigate('/login');
+          }
+          const errorData = await response.json();
+          setSnackbar({
+            open: true,
+            message: errorData.message || 'Erro ao buscar dados do usuário',
+            severity: 'error',
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+        setSnackbar({
+          open: true,
+          message: 'Erro ao buscar dados do usuário',
+          severity: 'error',
+        });
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
 
   const handleSubmit = async () => {
-    const response = await fetch('http://localhost:3001/submit-form', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user: 'usuario_teste',
-        group: 'A',
-        formData: window.formData || {},
-      }),
-    });
+    if (!userData) {
+      setSnackbar({
+        open: true,
+        message: 'Dados do usuário não disponíveis',
+        severity: 'error',
+      });
+      return;
+    }
 
-    const result = await response.json();
-    console.log(result.message);
+    try {
+      const formData = getData();
+      if (!formData) {
+        setSnackbar({
+          open: true,
+          message: 'JSON inválido no editor',
+          severity: 'error',
+        });
+        return;
+      }
+
+      // Validar dados
+      const validationErrors = validateFormData(formData);
+      if (validationErrors.length > 0) {
+        setSnackbar({
+          open: true,
+          message: 'Erros de validação encontrados:\n' + validationErrors.join('\n'),
+          severity: 'error',
+        });
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const requestData = {
+        user: {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          group: userData.group,
+        },
+        formData,
+      };
+
+      const response = await fetch('/api/form/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: 'Formulário enviado com sucesso!',
+          severity: 'success',
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: result.message || 'Erro ao enviar formulário',
+          severity: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erro ao conectar com o servidor',
+        severity: 'error',
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   const handleLogout = () => {
@@ -29,16 +152,7 @@ const PlaygroundHeader = ({ examples, selected, onSelect }) => {
 
   return (
     <Box display='flex' alignItems='center' justifyContent='space-between' mb={3}>
-      <Typography
-        variant='h4'
-        fontWeight='bold'
-        className='title-effect'
-        sx={{
-          fontSize: '2rem',
-          textTransform: 'uppercase',
-          mb: 1,
-        }}
-      >
+      <Typography variant='h4' fontWeight='bold' className='title-effect' sx={STYLES.header.title}>
         JSON Form Playground
       </Typography>
       <Box display='flex' alignItems='center' gap={2}>
@@ -46,43 +160,7 @@ const PlaygroundHeader = ({ examples, selected, onSelect }) => {
           <Select
             value={selected}
             onChange={(e) => onSelect(e.target.value)}
-            sx={{
-              backgroundColor: '#9b87f5',
-              color: '#ffffff',
-              borderRadius: '8px',
-              '& .MuiSelect-icon': {
-                color: '#ffffff',
-              },
-              '&:hover': {
-                backgroundColor: '#7E69AB',
-              },
-              '& .MuiOutlinedInput-notchedOutline': {
-                border: 'none',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                border: '2px solid #7E69AB',
-              },
-            }}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  backgroundColor: '#221F26',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  '& .MuiMenuItem-root': {
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: 'rgba(155, 135, 245, 0.1)',
-                    },
-                    '&.Mui-selected': {
-                      backgroundColor: 'rgba(155, 135, 245, 0.2)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(155, 135, 245, 0.3)',
-                      },
-                    },
-                  },
-                },
-              },
-            }}
+            sx={STYLES.header.select}
           >
             {examples.map((ex) => (
               <MenuItem key={ex.name} value={ex.name}>
@@ -91,38 +169,23 @@ const PlaygroundHeader = ({ examples, selected, onSelect }) => {
             ))}
           </Select>
         </FormControl>
-        <Button
-          onClick={handleSubmit}
-          sx={{
-            backgroundColor: '#28a745',
-            color: '#ffffff',
-            borderRadius: '8px',
-            fontWeight: 'bold',
-            padding: '8px 24px',
-            '&:hover': {
-              backgroundColor: '#218838',
-            },
-          }}
-        >
+        <Button onClick={handleSubmit} sx={STYLES.header.submitButton}>
           ENVIAR
         </Button>
-        <Button
-          onClick={handleLogout}
-          sx={{
-            backgroundColor: '#dc3545',
-            color: '#ffffff',
-            borderRadius: '8px',
-            fontWeight: 'bold',
-            padding: '8px 24px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            },
-          }}
-        >
+        <Button onClick={handleLogout} sx={STYLES.header.logoutButton}>
           SAIR
         </Button>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={SNACKBAR_DURATION}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

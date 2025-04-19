@@ -1,44 +1,61 @@
-import { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Grid, Tabs, Tab, Paper } from '@mui/material';
 import PlaygroundHeader from '../components/playgroundHeader';
 import CodeEditor from '../components/editor';
 import FormPreview from '../components/formPreview';
 import TabPanel from '../components/tabPanel';
-import { examples } from '../utils/examples';
 
-const Playground = () => {
+// Importa todos os arquivos .jsx da pasta utils
+const modules = import.meta.glob('../utils/*.jsx', { eager: true });
+
+// Filtra apenas os exemplos (objetos que têm a propriedade 'name')
+const examples = Object.values(modules)
+  .map((module) => module.default || Object.values(module)[0])
+  .filter((example) => example && example.name);
+
+function Playground() {
+  const initialExample = examples[0];
+  const [editorSchema, setEditorSchema] = useState(JSON.stringify(initialExample.schema, null, 2));
+  const [editorUischema, setEditorUischema] = useState(
+    JSON.stringify(initialExample.uischema, null, 2),
+  );
+  const [formData, setFormData] = useState(initialExample.data || {});
+  const [selected, setSelected] = useState(initialExample.name);
   const [tabIndex, setTabIndex] = useState(0);
-  const [selectedExample, setSelectedExample] = useState(examples[0].name);
 
-  const current = examples.find((e) => e.name === selectedExample);
-
-  const [schema, setSchema] = useState(JSON.stringify(current.schema, null, 2));
-  const [uischema, setUiSchema] = useState(JSON.stringify(current.uischema, null, 2));
-  const [formData, setFormData] = useState(current.data);
-
-  const handleChangeExample = (exampleName) => {
-    const ex = examples.find((e) => e.name === exampleName);
-    setSelectedExample(exampleName);
-    setSchema(JSON.stringify(ex.schema, null, 2));
-    setUiSchema(JSON.stringify(ex.uischema, null, 2));
-    setFormData(ex.data);
-  };
-
-  const parseJSON = (text, fallback = {}) => {
+  const handleGetData = useCallback(() => {
     try {
-      return JSON.parse(text);
-    } catch {
-      return fallback;
+      return {
+        schema: JSON.parse(editorSchema),
+        uischema: JSON.parse(editorUischema),
+        data: formData,
+      };
+    } catch (e) {
+      console.error('Erro ao parsear JSON:', e);
+      return null;
+    }
+  }, [editorSchema, editorUischema, formData]);
+
+  const handleExampleSelect = (exampleName) => {
+    const example = examples.find((ex) => ex.name === exampleName);
+    if (example) {
+      setEditorSchema(JSON.stringify(example.schema, null, 2));
+      setEditorUischema(JSON.stringify(example.uischema, null, 2));
+      setFormData(example.data || {});
+      setSelected(exampleName);
     }
   };
+
+  const currentData = handleGetData();
 
   return (
     <div className='min-h-screen bg-[#1A1F2C] text-white'>
       <div className='p-8'>
         <PlaygroundHeader
           examples={examples}
-          selected={selectedExample}
-          onSelect={handleChangeExample}
+          selected={selected}
+          onSelect={handleExampleSelect}
+          getData={handleGetData}
         />
 
         <Grid container spacing={3}>
@@ -75,10 +92,10 @@ const Playground = () => {
               </Tabs>
 
               <TabPanel value={tabIndex} index={0}>
-                <CodeEditor value={schema} onChange={(v) => setSchema(v)} />
+                <CodeEditor value={editorSchema} onChange={setEditorSchema} />
               </TabPanel>
               <TabPanel value={tabIndex} index={1}>
-                <CodeEditor value={uischema} onChange={(v) => setUiSchema(v)} />
+                <CodeEditor value={editorUischema} onChange={setEditorUischema} />
               </TabPanel>
               <TabPanel value={tabIndex} index={2}>
                 <CodeEditor
@@ -87,7 +104,7 @@ const Playground = () => {
                     try {
                       setFormData(JSON.parse(v));
                     } catch {
-                      // Ignoring JSON parse errors
+                      // Ignora erros de parse durante a digitação
                     }
                   }}
                 />
@@ -106,10 +123,16 @@ const Playground = () => {
               }}
             >
               <FormPreview
-                schema={parseJSON(schema)}
-                uischema={parseJSON(uischema)}
+                schema={currentData?.schema || {}}
+                uischema={currentData?.uischema || {}}
                 data={formData}
                 onChange={setFormData}
+                onFieldInteraction={(fieldName) => {
+                  // Registrar interação com o campo
+                  if (window.registerFieldInteraction) {
+                    window.registerFieldInteraction(fieldName);
+                  }
+                }}
               />
             </Paper>
           </Grid>
@@ -117,6 +140,6 @@ const Playground = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Playground;
