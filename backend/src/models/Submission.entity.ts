@@ -6,8 +6,8 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { User } from './User';
-import { Form } from './Form';
+import { User } from './User.entity';
+import { Form } from './Form.entity';
 
 @Entity()
 export class Submission {

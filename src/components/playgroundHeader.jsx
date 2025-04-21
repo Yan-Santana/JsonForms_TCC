@@ -98,13 +98,11 @@ const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
 
       const token = localStorage.getItem('token');
       const requestData = {
-        user: {
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          group: userData.group,
+        userId: userData.id,
+        formData: {
+          ...formData,
+          name: selected,
         },
-        formData,
       };
 
       const response = await fetch('/api/form/submit', {

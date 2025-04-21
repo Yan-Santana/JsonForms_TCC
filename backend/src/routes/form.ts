@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { AppDataSource } from '../config/database';
-import { Form } from '../entities/Form';
+import { Form } from '../models/Form.entity';
+import { User } from '../models/User.entity';
 
 const router = Router();
 
@@ -24,20 +25,11 @@ const router = Router();
  *           schema:
  *             type: object
  *             required:
- *               - user
+ *               - userId
  *               - formData
  *             properties:
- *               user:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: number
- *                   name:
- *                     type: string
- *                   email:
- *                     type: string
- *                   group:
- *                     type: string
+ *               userId:
+ *                 type: number
  *               formData:
  *                 type: object
  *                 properties:
@@ -57,8 +49,7 @@ const router = Router();
  */
 router.post('/submit', async (req, res) => {
   try {
-    const { user, formData } = req.body;
-    console.log('Dados recebidos:', req.body);
+    const { userId, formData } = req.body;
 
     if (!formData?.schema || !formData?.uischema) {
       return res.status(400).json({
@@ -67,26 +58,48 @@ router.post('/submit', async (req, res) => {
       });
     }
 
+    // Buscar o usuário
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuário não encontrado',
+      });
+    }
+
     const formRepository = AppDataSource.getRepository(Form);
 
     const newForm = formRepository.create({
-      user,
-      formData: {
-        schema: formData.schema,
-        uischema: formData.uischema,
-        data: formData.data || {},
-      },
+      title: formData.name || formData.schema.title || 'Formulário sem título',
+      schema: formData.schema,
+      uischema: formData.uischema,
+      user: user,
     });
 
     const savedForm = await formRepository.save(newForm);
 
-    // Buscar o formulário salvo para confirmar os dados
-    const retrievedForm = await formRepository.findOne({ where: { id: savedForm.id } });
+    const formWithUserId = await formRepository.findOne({
+      where: { id: savedForm.id },
+      relations: ['user'],
+      select: {
+        user: {
+          id: true,
+        },
+        id: true,
+        title: true,
+        schema: true,
+        uischema: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
 
     res.status(201).json({
       success: true,
       message: 'Formulário enviado com sucesso',
-      data: retrievedForm,
+      data: formWithUserId,
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';

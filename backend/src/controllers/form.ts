@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { Form } from '../models/Form';
-import { Submission } from '../models/Submission';
-import { User } from '../models/User';
+import { Form } from '../models/Form.entity';
+import { Submission } from '../models/Submission.entity';
+import { User } from '../models/User.entity';
 import { validate } from 'jsonschema';
 import { AppDataSource } from '../config/database';
 

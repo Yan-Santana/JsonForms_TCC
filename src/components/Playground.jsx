@@ -16,7 +16,6 @@ const Playground = () => {
   const [formData, setFormData] = useState({});
   const [selected, setSelected] = useState(FORM_EXAMPLES[0].name);
 
-  // Parse os dados do editor para objetos JSON
   const getData = useCallback(() => {
     try {
       const schema = JSON.parse(editorSchema);
