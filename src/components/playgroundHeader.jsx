@@ -14,10 +14,20 @@ import { useState, useEffect } from 'react';
 import { STYLES, SNACKBAR_DURATION } from '../styles/headerStyles';
 import { validateFormData } from '../pages/formValidation.jsx';
 
-const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
+const PlaygroundHeader = ({
+  examples,
+  selected,
+  onSelect,
+  getData,
+  onSchemaEdit,
+  onUiSchemaEdit,
+}) => {
   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [userData, setUserData] = useState(null);
+  const [isStarted, setIsStarted] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+  const [firstAttemptTime, setFirstAttemptTime] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -64,11 +74,28 @@ const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
     fetchUserData();
   }, [navigate]);
 
+  const handleStart = () => {
+    setIsStarted(true);
+    setStartTime(Date.now());
+    if (!firstAttemptTime) {
+      setFirstAttemptTime(Date.now());
+    }
+  };
+
   const handleSubmit = async () => {
     if (!userData) {
       setSnackbar({
         open: true,
         message: 'Dados do usuário não disponíveis',
+        severity: 'error',
+      });
+      return;
+    }
+
+    if (!isStarted) {
+      setSnackbar({
+        open: true,
+        message: 'Clique em INICIAR antes de enviar',
         severity: 'error',
       });
       return;
@@ -80,6 +107,38 @@ const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
         setSnackbar({
           open: true,
           message: 'JSON inválido no editor',
+          severity: 'error',
+        });
+        return;
+      }
+
+      // Verificar se há erros de renderização
+      const hasRenderError =
+        document.querySelector('.MuiAlert-standardError') !== null ||
+        Array.from(document.querySelectorAll('*')).some(
+          (el) => el.textContent === 'No applicable renderer found.',
+        );
+
+      if (hasRenderError) {
+        // Enviar o erro para análise antes de mostrar a mensagem
+        const token = localStorage.getItem('token');
+        await fetch('/api/form/error', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: userData.id,
+            errorType: 'render_error',
+            formName: selected,
+            timestamp: new Date().toISOString(),
+          }),
+        });
+
+        setSnackbar({
+          open: true,
+          message: 'Corrija os erros de renderização antes de enviar',
           severity: 'error',
         });
         return;
@@ -103,6 +162,10 @@ const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
           ...formData,
           name: selected,
         },
+        metrics: {
+          totalTimeSpent: Date.now() - startTime,
+          firstAttemptTime: firstAttemptTime ? Date.now() - firstAttemptTime : null,
+        },
       };
 
       const response = await fetch('/api/form/submit', {
@@ -117,6 +180,11 @@ const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
       const result = await response.json();
 
       if (response.ok) {
+        // Resetar o timer após envio bem-sucedido
+        setIsStarted(false);
+        setStartTime(null);
+        setFirstAttemptTime(null);
+
         setSnackbar({
           open: true,
           message: 'Formulário enviado com sucesso!',
@@ -167,7 +235,20 @@ const PlaygroundHeader = ({ examples, selected, onSelect, getData }) => {
             ))}
           </Select>
         </FormControl>
-        <Button onClick={handleSubmit} sx={STYLES.header.submitButton}>
+        <Button
+          onClick={handleStart}
+          disabled={isStarted}
+          sx={{
+            ...STYLES.header.submitButton,
+            bgcolor: isStarted ? 'grey.500' : 'success.main',
+            '&:hover': {
+              bgcolor: isStarted ? 'grey.600' : 'success.dark',
+            },
+          }}
+        >
+          {isStarted ? 'INICIADO' : 'INICIAR'}
+        </Button>
+        <Button onClick={handleSubmit} disabled={!isStarted} sx={STYLES.header.submitButton}>
           ENVIAR
         </Button>
         <Button onClick={handleLogout} sx={STYLES.header.logoutButton}>

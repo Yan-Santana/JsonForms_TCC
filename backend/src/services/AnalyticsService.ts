@@ -1,6 +1,11 @@
 import { AppDataSource } from '../config/database';
 import { User } from '../models/User.entity';
 
+interface UserSpeed {
+  name: string;
+  time: number;
+}
+
 export class AnalyticsService {
   private userRepository = AppDataSource.getRepository(User);
 
@@ -13,6 +18,28 @@ export class AnalyticsService {
     const calculateAverages = (group: User[]) => {
       if (group.length === 0) return null;
 
+      // Encontrar usuários mais rápidos e mais lentos (apenas entre os que completaram)
+      const usersWithAttempts = group.filter((user) => user.firstAttemptTime > 0);
+      const sortedBySpeed = [...usersWithAttempts].sort(
+        (a, b) => a.firstAttemptTime - b.firstAttemptTime,
+      );
+
+      const fastest: UserSpeed | null =
+        sortedBySpeed.length > 0
+          ? {
+              name: sortedBySpeed[0].name,
+              time: sortedBySpeed[0].firstAttemptTime,
+            }
+          : null;
+
+      const slowest: UserSpeed | null =
+        sortedBySpeed.length > 0
+          ? {
+              name: sortedBySpeed[sortedBySpeed.length - 1].name,
+              time: sortedBySpeed[sortedBySpeed.length - 1].firstAttemptTime,
+            }
+          : null;
+
       return {
         averageSubmissions:
           group.reduce((sum, user) => sum + user.totalSubmissions, 0) / group.length,
@@ -21,10 +48,11 @@ export class AnalyticsService {
           group.reduce((sum, user) => sum + user.uiSchemaEdits, 0) / group.length,
         averageTimeSpent: group.reduce((sum, user) => sum + user.totalTimeSpent, 0) / group.length,
         averageErrorCount: group.reduce((sum, user) => sum + user.errorCount, 0) / group.length,
-        averageResetCount: group.reduce((sum, user) => sum + user.resetCount, 0) / group.length,
         averageFirstAttemptTime:
           group.reduce((sum, user) => sum + (user.firstAttemptTime || 0), 0) / group.length,
         totalUsers: group.length,
+        fastest,
+        slowest,
       };
     };
 

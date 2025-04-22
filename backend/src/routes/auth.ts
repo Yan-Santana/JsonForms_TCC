@@ -2,8 +2,10 @@ import { Router } from 'express';
 import { register, login, getMe } from '../controllers/auth';
 import { authenticateToken } from '../middlewares/auth';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { AuthController } from '../controllers/AuthController';
 
 const router = Router();
+const authController = new AuthController();
 
 /**
  * @swagger
@@ -112,6 +114,6 @@ router.post('/login', login);
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/me', authenticateToken, (req: AuthenticatedRequest, res) => getMe(req, res));
+router.get('/me', authenticateToken, authController.getCurrentUser.bind(authController));
 
 export default router;

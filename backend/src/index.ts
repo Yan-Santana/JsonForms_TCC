@@ -7,6 +7,7 @@ import { loggingMiddleware } from './middlewares/logging';
 import { errorMiddleware } from './middlewares/error';
 import authRoutes from './routes/auth';
 import formRoutes from './routes/form';
+import analyticsRoutes from './routes/analytics';
 
 // Carrega as variáveis de ambiente
 dotenv.config();
@@ -26,6 +27,7 @@ setupSwaggerUI(app);
 // Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/form', formRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Rota de teste
 app.get('/api/test', (req, res) => {

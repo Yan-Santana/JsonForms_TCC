@@ -12,25 +12,7 @@ const options: swaggerJsdoc.Options = {
       title: 'API JsonForms Analytics',
       version: '1.0.0',
       description: 'API para gerenciamento de formulários e análise de dados',
-      contact: {
-        name: 'Suporte',
-        email: 'suporte@exemplo.com',
-      },
     },
-    servers: [
-      {
-        url: '/',
-        description: 'API Local',
-      },
-      {
-        url: 'http://localhost:5000',
-        description: 'Servidor Local (Porta 5000)',
-      },
-      {
-        url: 'http://localhost:5001',
-        description: 'Servidor Local (Porta 5001)',
-      },
-    ],
     components: {
       schemas: {
         User: {
@@ -38,8 +20,8 @@ const options: swaggerJsdoc.Options = {
           required: ['firstName', 'lastName', 'email', 'password', 'group'],
           properties: {
             id: {
-              type: 'string',
-              format: 'uuid',
+              type: 'number',
+              format: 'id',
               description: 'ID único do usuário',
             },
             firstName: {
