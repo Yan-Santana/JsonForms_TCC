@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AuthPage from './pages/AuthPage';
 import PrivateRoute from './components/PrivateRoute';
 import Playground from './pages/Playground';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route path='/login' element={<AuthPage />} />
         <Route path='/signup' element={<Navigate to='/login' replace />} />
-        <Route path='/analytics' element={<AnalyticsDashboard />} />
+        <Route path='/analytics' element={<Dashboard />} />
         <Route
           path='/'
           element={
