@@ -17,8 +17,8 @@ interface GroupComparisonChartProps {
   description?: string;
   data: Array<{
     name: string;
-    grupoA: number;
-    grupoB: number;
+    grupoA: number | string;
+    grupoB: number | string;
   }>;
   colors?: {
     grupoA: string;
@@ -32,11 +32,14 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
     return (
       <div className='bg-white p-2 border border-gray-200 shadow-md rounded-md'>
         <p className='font-bold'>{`${label}`}</p>
-        {payload.map((item, index) => (
-          <p key={index} style={{ color: item.color }}>
-            {`${item.name}: ${item.value}`}
-          </p>
-        ))}
+        {payload.map((item, index) => {
+          const formattedValue = (item.payload as any)[`${item.dataKey}Formatted`];
+          return (
+            <p key={index} style={{ color: item.color }}>
+              {`${item.name}: ${formattedValue || item.value}`}
+            </p>
+          );
+        })}
       </div>
     );
   }

@@ -1,25 +1,44 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatCard } from '@/components/dashboard/StatCard';
-import { GroupComparisonChart } from '@/components/dashboard/GroupComparisonChart';
-import { TimelineChart } from '@/components/dashboard/TimelineChart';
 import { DataTable } from '@/components/dashboard/DataTable';
-import { PerformanceRadarChart } from '@/components/dashboard/PerformanceRadarChart';
+import { GroupComparisonChart } from '@/components/dashboard/GroupComparisonChart';
 import { Navbar } from '@/components/dashboard/Navbar';
-import { BarChart, Users, Clock, Bug, Timer, FileText } from 'lucide-react';
-
-import {
-  submissionsData,
-  editsData,
-  completionTimeData,
-  errorsData,
-  firstAttemptData,
-  timelineData,
-  performanceData,
-  comparisonTable,
-} from '@/data/mock-data';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart, Bug, Clock, FileText, Timer, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { PerformanceRadarChart } from '@/components/dashboard/PerformanceRadarChart';
+import { AnalyticsResponse, ChartData } from '@/types/analytics';
+import { fetchAnalytics } from '@/services/analyticsService';
 
 const Dashboard = () => {
+  const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      try {
+        const data = await fetchAnalytics();
+        setAnalytics(data);
+        setChartData(data.chartData);
+      } catch (error) {
+        console.error('Erro ao carregar dados de análise:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAnalytics();
+  }, []);
+
+  if (loading) {
+    return <div className='flex items-center justify-center h-screen'>Carregando...</div>;
+  }
+
+  if (!analytics || !chartData) {
+    return <div className='flex items-center justify-center h-screen'>Erro ao carregar dados</div>;
+  }
+
   return (
     <div className='h-screen flex flex-col'>
       <Navbar />
@@ -32,99 +51,114 @@ const Dashboard = () => {
           <div className='grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4'>
             <StatCard
               title='Submissões'
-              value={`${submissionsData[0].grupoA} vs ${submissionsData[0].grupoB}`}
+              value={`${chartData.submissionsData[0].grupoA} vs ${chartData.submissionsData[0].grupoB}`}
               description='Total de submissões por grupo'
               icon={<BarChart className='h-4 w-4' />}
-              trend={{ value: 14, isPositive: true }}
+              trend={{
+                value: Math.round((analytics.analytics.comparison.submissions || 0) * 100),
+                isPositive: true,
+              }}
             />
             <StatCard
               title='Edições'
-              value={`${editsData[0].grupoA + editsData[1].grupoA} vs ${editsData[0].grupoB + editsData[1].grupoB}`}
+              value={`${chartData.editsData[0].grupoA + chartData.editsData[1].grupoA} vs ${chartData.editsData[0].grupoB + chartData.editsData[1].grupoB}`}
               description='Total de edições em schemas'
               icon={<FileText className='h-4 w-4' />}
-              trend={{ value: 31, isPositive: false }}
+              trend={{
+                value: Math.round((analytics.analytics.comparison.timeEfficiency || 0) * 100),
+                isPositive: false,
+              }}
             />
             <StatCard
               title='Tempo até Conclusão'
-              value={`${completionTimeData[0].grupoA} vs ${completionTimeData[0].grupoB} min`}
+              value={`${chartData.completionTimeData[0].grupoAFormatted} vs ${chartData.completionTimeData[0].grupoBFormatted}`}
               description='Tempo médio para finalizar'
               icon={<Clock className='h-4 w-4' />}
-              trend={{ value: 17, isPositive: true }}
+              trend={{
+                value: Math.round((analytics.analytics.comparison.errorRate || 0) * 100),
+                isPositive: true,
+              }}
             />
             <StatCard
               title='Erros'
-              value={`${errorsData[0].grupoA + errorsData[1].grupoA} vs ${errorsData[0].grupoB + errorsData[1].grupoB}`}
+              value={`${chartData.errorsData[0].grupoA} vs ${chartData.errorsData[0].grupoB}`}
               description='Total de erros ocorridos'
               icon={<Bug className='h-4 w-4' />}
-              trend={{ value: 35, isPositive: true }}
+              trend={{
+                value: Math.round((analytics.analytics.comparison.errorRate || 0) * 100),
+                isPositive: true,
+              }}
             />
           </div>
 
-          <div className='grid gap-4 grid-cols-1 md:grid-cols-3'>
-            <Card className='col-span-1 md:col-span-2'>
-              <CardHeader>
-                <CardTitle>Visão Geral</CardTitle>
-                <CardDescription>
-                  Comparação entre o Grupo A e o Grupo B em diferentes métricas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className='text-muted-foreground mb-4'>
-                  A análise indica que o <span className='font-bold text-purple-600'>Grupo A</span>{' '}
-                  apresenta melhor desempenho em 6 das 7 métricas analisadas, com destaque para
-                  menos erros (-35%).
-                </p>
-                <div className='grid gap-4 grid-cols-1 md:grid-cols-2'>
-                  <StatCard
-                    title='Primeira Tentativa'
-                    value={`${firstAttemptData[0].grupoA} vs ${firstAttemptData[0].grupoB} min`}
-                    description='Tempo até a primeira tentativa'
-                    icon={<Timer className='h-4 w-4' />}
-                    trend={{ value: 31, isPositive: true }}
-                  />
-                  <StatCard
-                    title='Total de Usuários'
-                    value='25 vs 28'
-                    description='Grupo A vs Grupo B'
-                    icon={<Users className='h-4 w-4' />}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            <PerformanceRadarChart
-              title='Comparativo de Performance'
-              description='Análise global das capacidades'
-              data={performanceData}
-            />
+          <div className='grid gap-4 grid-cols-1 md:grid-cols-4'>
+            <div className='col-span-1 md:col-span-2'>
+              <Card className='h-full'>
+                <CardHeader>
+                  <CardTitle>Visão Geral</CardTitle>
+                  <CardDescription>
+                    Comparação entre o Grupo A e o Grupo B em diferentes métricas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-muted-foreground mb-4'>
+                    A análise indica que o{' '}
+                    <span className='font-bold text-purple-600'>Grupo A</span> apresenta melhor
+                    desempenho em 6 das 7 métricas analisadas, com destaque para menos erros (-35%).
+                  </p>
+                  <div className='grid gap-4 grid-cols-1'>
+                    <StatCard
+                      title='Primeira Tentativa'
+                      value={`${chartData.firstAttemptTime.grupoA} vs ${chartData.firstAttemptTime.grupoB} min`}
+                      description='Tempo até a primeira tentativa'
+                      icon={<Timer className='h-4 w-4' />}
+                      trend={{ value: 31, isPositive: true }}
+                    />
+                    <StatCard
+                      title='Total de Usuários'
+                      value={`${chartData.totalUsers.grupoA} vs ${chartData.totalUsers.grupoB}`}
+                      description='Grupo A vs Grupo B'
+                      icon={<Users className='h-4 w-4' />}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className='col-span-1 md:col-span-2 h-full'>
+              <PerformanceRadarChart
+                title='Comparativo de Performance'
+                description='Análise global das capacidades'
+                data={chartData.performanceData}
+              />
+            </div>
           </div>
 
           <Tabs defaultValue='graficos'>
             <TabsList className='mb-4'>
               <TabsTrigger value='graficos'>Gráficos</TabsTrigger>
               <TabsTrigger value='tabelas'>Tabelas</TabsTrigger>
-              <TabsTrigger value='timeline'>Timeline</TabsTrigger>
             </TabsList>
             <TabsContent value='graficos' className='space-y-4'>
               <div className='grid gap-4 grid-cols-1 md:grid-cols-2'>
                 <GroupComparisonChart
                   title='Submissões'
                   description='Análise de submissões por tipo'
-                  data={submissionsData}
+                  data={chartData.submissionsData}
                 />
                 <GroupComparisonChart
                   title='Edições de Schema'
                   description='Quantidade de edições por tipo'
-                  data={editsData}
+                  data={chartData.editsData}
                 />
                 <GroupComparisonChart
                   title='Tempo até Conclusão (minutos)'
                   description='Análise estatística do tempo'
-                  data={completionTimeData}
+                  data={chartData.completionTimeData}
                 />
                 <GroupComparisonChart
                   title='Análise de Erros'
                   description='Tipos de erros encontrados'
-                  data={errorsData}
+                  data={chartData.errorsData}
                 />
               </div>
             </TabsContent>
@@ -139,15 +173,7 @@ const Dashboard = () => {
                   { key: 'diferenca', header: 'Diferença' },
                   { key: 'significancia', header: 'Significância' },
                 ]}
-                data={comparisonTable}
-              />
-            </TabsContent>
-            <TabsContent value='timeline'>
-              <TimelineChart
-                title='Evolução Semanal'
-                description='Progresso de submissões ao longo do tempo'
-                data={timelineData}
-                yAxisLabel='Submissões'
+                data={chartData.comparisonTable}
               />
             </TabsContent>
           </Tabs>
@@ -168,25 +194,23 @@ const Dashboard = () => {
                 </p>
                 <ul className='list-disc pl-6 space-y-2'>
                   <li>
-                    <strong>Eficiência:</strong> O Grupo A conseguiu realizar mais submissões (+14%)
-                    com menos edições em schemas (-32% em média).
+                    <strong>Eficiência:</strong> O Grupo A conseguiu realizar mais submissões (
+                    {Math.round((analytics.analytics.comparison.submissions || 0) * 100)}%) com
+                    menos edições em schemas (
+                    {Math.round((analytics.analytics.comparison.timeEfficiency || 0) * 100)}% em
+                    média).
                   </li>
                   <li>
-                    <strong>Velocidade:</strong> O tempo médio até a conclusão foi 17% menor no
-                    Grupo A, e o tempo até a primeira tentativa foi 31% menor.
+                    <strong>Velocidade:</strong> O tempo médio até a conclusão foi{' '}
+                    {Math.round((analytics.analytics.comparison.errorRate || 0) * 100)}% menor no
+                    Grupo A.
                   </li>
                   <li>
-                    <strong>Qualidade:</strong> O Grupo A apresentou 35% menos erros.
-                  </li>
-                  <li>
-                    <strong>Significância:</strong> As diferenças mais significativas foram
-                    observadas nos aspectos de qualidade (erros).
+                    <strong>Qualidade:</strong> O Grupo A apresentou{' '}
+                    {Math.round((analytics.analytics.comparison.errorRate || 0) * 100)}% menos
+                    erros.
                   </li>
                 </ul>
-                <p className='mt-4'>
-                  Estes resultados sugerem que a abordagem pedagógica utilizada com o Grupo A foi
-                  mais efetiva e poderia ser expandida para futuros grupos de aprendizado.
-                </p>
               </div>
             </CardContent>
           </Card>

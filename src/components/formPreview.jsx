@@ -4,7 +4,7 @@ import { Paper, Typography, Box } from '@mui/material';
 
 const FormPreview = ({ schema, uischema, data, onChange, onFieldInteraction }) => {
   const handleChange = ({ data, errors }) => {
-    // Se houver uma mudança em um campo específico, registrar a interação
+    // Se hhouver uma mudança em um campo específico, registrar a interação
     const changedField = Object.keys(data).find((key) => data[key] !== onChange.data?.[key]);
     if (changedField && onFieldInteraction) {
       onFieldInteraction(changedField);

@@ -1,3 +1,13 @@
+import { AnalyticsResponse } from '@/types/analytics';
+
+export const fetchAnalytics = async (): Promise<AnalyticsResponse> => {
+  const response = await fetch('/api/analytics');
+  if (!response.ok) {
+    throw new Error('Erro ao buscar dados de análise');
+  }
+  return response.json();
+};
+
 export const submissionsData = [
   { name: 'Submissões Válidas', grupoA: 120, grupoB: 105 },
   { name: 'Submissões Inválidas', grupoA: 15, grupoB: 25 },

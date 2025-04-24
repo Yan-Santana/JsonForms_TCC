@@ -48,6 +48,12 @@ export class User {
   @Column({ type: 'bigint', nullable: true })
   firstAttemptTime!: number; // em milissegundos
 
+  @Column({ default: 0 })
+  codeErrors!: number;
+
+  @Column({ default: 0 })
+  formErrors!: number;
+
   @CreateDateColumn()
   createdAt!: Date;
 

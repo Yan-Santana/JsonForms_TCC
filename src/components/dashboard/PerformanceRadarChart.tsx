@@ -37,8 +37,14 @@ export function PerformanceRadarChart({
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width='100%' height={400}>
-          <RadarChart cx='50%' cy='50%' outerRadius='80%' data={data}>
+        <ResponsiveContainer width='100%' height={450}>
+          <RadarChart
+            cx='50%'
+            cy='50%'
+            outerRadius='100%'
+            data={data}
+            margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
+          >
             <PolarGrid />
             <PolarAngleAxis dataKey='subject' />
             <PolarRadiusAxis />

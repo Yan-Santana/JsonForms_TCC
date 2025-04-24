@@ -10,6 +10,12 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+/* 
+  Este componente é responsável por exibir um gráfico de linha que compara as respostas dos grupos A e B.
+  Ao longo do tempo, o gráfico exibe o número de respostas dos grupos A e B.
+  Tenho que ver como fazer isso com o Seninho.
+*/
+
 interface TimelineChartProps {
   title: string;
   description?: string;
