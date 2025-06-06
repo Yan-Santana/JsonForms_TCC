@@ -15,6 +15,28 @@ const Playground = () => {
   );
   const [formData, setFormData] = useState({});
   const [selected, setSelected] = useState(FORM_EXAMPLES[0].name);
+  const [errors, setErrors] = useState({ code: 0, form: 0 });
+
+  const registerError = async (type) => {
+    try {
+      await fetch('/api/analytics/error', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+      setErrors((prev) => ({
+        ...prev,
+        [type]: prev[type] + 1,
+      }));
+    } catch (e) {
+      console.error('Erro ao registrar erro:', e);
+    }
+  };
 
   const getData = useCallback(() => {
     try {
@@ -27,6 +49,7 @@ const Playground = () => {
       };
     } catch (e) {
       console.error('Erro ao parsear JSON:', e);
+      registerError('code');
       return null;
     }
   }, [editorSchema, editorUischema, formData]);
@@ -49,6 +72,10 @@ const Playground = () => {
     setEditorUischema(value);
   };
 
+  const handleFormError = () => {
+    registerError('form');
+  };
+
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', p: 2 }}>
       <PlaygroundHeader
@@ -56,6 +83,7 @@ const Playground = () => {
         selected={selected}
         onSelect={handleExampleSelect}
         getData={getData}
+        errors={errors}
       />
 
       <Grid container spacing={2} sx={{ flexGrow: 1 }}>
@@ -77,6 +105,7 @@ const Playground = () => {
             uischema={getData()?.uischema || {}}
             data={formData}
             onChange={setFormData}
+            onError={handleFormError}
           />
         </Grid>
       </Grid>

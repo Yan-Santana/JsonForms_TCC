@@ -12,6 +12,7 @@ export interface GroupAnalytics {
   averageErrorCount: number;
   averageFirstAttemptTime: number;
   totalUsers: number;
+  codeResets: number;
   fastest?: UserSpeed;
   slowest?: UserSpeed;
 }
@@ -73,4 +74,4 @@ export interface AnalyticsResponse {
     };
   };
   chartData: ChartData;
-} 
+}

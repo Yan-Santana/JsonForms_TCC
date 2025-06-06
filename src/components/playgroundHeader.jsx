@@ -8,11 +8,12 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { logout } from '../services/auth';
+import { logout, getProfile } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { STYLES, SNACKBAR_DURATION } from '../styles/headerStyles';
 import { validateFormData } from '../pages/formValidation.jsx';
+import api from '../config/api';
 
 const PlaygroundHeader = ({
   examples,
@@ -32,37 +33,14 @@ const PlaygroundHeader = ({
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
-        const response = await fetch('/api/auth/me', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUserData(data);
-        } else {
-          if (response.status === 401) {
-            logout();
-            navigate('/login');
-          }
-          const errorData = await response.json();
-          setSnackbar({
-            open: true,
-            message: errorData.message || 'Erro ao buscar dados do usuário',
-            severity: 'error',
-          });
-        }
+        const data = await getProfile();
+        setUserData(data);
       } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error);
+        if (error.response?.status === 401) {
+          logout();
+          navigate('/login');
+        }
         setSnackbar({
           open: true,
           message: 'Erro ao buscar dados do usuário',
@@ -74,12 +52,54 @@ const PlaygroundHeader = ({
     fetchUserData();
   }, [navigate]);
 
-  const handleStart = () => {
-    setIsStarted(true);
-    setStartTime(Date.now());
-    if (!firstAttemptTime) {
-      setFirstAttemptTime(Date.now());
+  const handleStart = async () => {
+    if (!userData) {
+      setSnackbar({
+        open: true,
+        message: 'Dados do usuário não disponíveis',
+        severity: 'error',
+      });
+      return;
     }
+
+    setIsStarted(true);
+    const currentTime = Date.now();
+    setStartTime(currentTime);
+
+    if (!firstAttemptTime) {
+      setFirstAttemptTime(currentTime);
+      // Registrar o tempo da primeira tentativa no backend
+      try {
+        await api.post('/api/analytics/attempt', {
+          userId: userData.id,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error('Erro ao registrar primeira tentativa:', error);
+      }
+    }
+  };
+
+  const handleExampleChange = async (value) => {
+    // Registrar o reset de código
+    if (userData && isStarted) {
+      try {
+        await api.post('/api/analytics/reset', {
+          userId: userData.id,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error('Erro ao registrar reset de código:', error);
+      }
+    }
+
+    // Resetar os timers
+    setIsStarted(false);
+    setStartTime(null);
+    setFirstAttemptTime(null);
+
+    // Chamar o onSelect original
+    onSelect(value);
   };
 
   const handleSubmit = async () => {
@@ -121,19 +141,11 @@ const PlaygroundHeader = ({
 
       if (hasRenderError) {
         // Enviar o erro para análise antes de mostrar a mensagem
-        const token = localStorage.getItem('token');
-        await fetch('/api/form/error', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            userId: userData.id,
-            errorType: 'render_error',
-            formName: selected,
-            timestamp: new Date().toISOString(),
-          }),
+        await api.post('/api/analytics/error', {
+          userId: userData.id,
+          errorType: 'render_error',
+          formName: selected,
+          timestamp: new Date().toISOString(),
         });
 
         setSnackbar({
@@ -155,7 +167,6 @@ const PlaygroundHeader = ({
         return;
       }
 
-      const token = localStorage.getItem('token');
       const requestData = {
         userId: userData.id,
         formData: {
@@ -168,18 +179,9 @@ const PlaygroundHeader = ({
         },
       };
 
-      const response = await fetch('/api/form/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestData),
-      });
+      const response = await api.post('/api/forms/submit', requestData);
 
-      const result = await response.json();
-
-      if (response.ok) {
+      if (response.data) {
         // Resetar o timer após envio bem-sucedido
         setIsStarted(false);
         setStartTime(null);
@@ -190,18 +192,12 @@ const PlaygroundHeader = ({
           message: 'Formulário enviado com sucesso!',
           severity: 'success',
         });
-      } else {
-        setSnackbar({
-          open: true,
-          message: result.message || 'Erro ao enviar formulário',
-          severity: 'error',
-        });
       }
     } catch (error) {
       console.error('Erro:', error);
       setSnackbar({
         open: true,
-        message: 'Erro ao conectar com o servidor',
+        message: error.response?.data?.message || 'Erro ao conectar com o servidor',
         severity: 'error',
       });
     }
@@ -225,7 +221,7 @@ const PlaygroundHeader = ({
         <FormControl size='small' sx={{ minWidth: 200 }}>
           <Select
             value={selected}
-            onChange={(e) => onSelect(e.target.value)}
+            onChange={(e) => handleExampleChange(e.target.value)}
             sx={STYLES.header.select}
           >
             {examples.map((ex) => (

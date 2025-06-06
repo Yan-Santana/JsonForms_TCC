@@ -25,9 +25,48 @@ function Playground() {
 
   const handleGetData = useCallback(() => {
     try {
+      // Remover espaços em branco extras e validar a formatação
+      const cleanSchema = editorSchema.trim();
+      const cleanUischema = editorUischema.trim();
+
+      // Verificar se os JSONs são válidos
+      if (!cleanSchema || !cleanUischema) {
+        throw new Error('Schema ou UI Schema vazios');
+      }
+
+      const schema = JSON.parse(cleanSchema);
+      const uischema = JSON.parse(cleanUischema);
+
+      // Validar se são objetos
+      if (typeof schema !== 'object' || typeof uischema !== 'object') {
+        throw new Error('Schema e UI Schema devem ser objetos JSON válidos');
+      }
+
+      // Validar tipos no schema
+      const validateTypes = (obj) => {
+        if (obj.type && typeof obj.type === 'string') {
+          const validTypes = ['string', 'number', 'integer', 'boolean', 'array', 'object', 'null'];
+          if (!validTypes.includes(obj.type)) {
+            throw new Error(
+              `Tipo inválido: ${obj.type}. Tipos válidos são: ${validTypes.join(', ')}`,
+            );
+          }
+        }
+
+        if (obj.properties) {
+          Object.values(obj.properties).forEach(validateTypes);
+        }
+
+        if (obj.items) {
+          validateTypes(obj.items);
+        }
+      };
+
+      validateTypes(schema);
+
       return {
-        schema: JSON.parse(editorSchema),
-        uischema: JSON.parse(editorUischema),
+        schema,
+        uischema,
         data: formData,
       };
     } catch (e) {
@@ -39,10 +78,22 @@ function Playground() {
   const handleExampleSelect = (exampleName) => {
     const example = examples.find((ex) => ex.name === exampleName);
     if (example) {
-      setEditorSchema(JSON.stringify(example.schema, null, 2));
-      setEditorUischema(JSON.stringify(example.uischema, null, 2));
-      setFormData(example.data || {});
-      setSelected(exampleName);
+      try {
+        // Garantir que os dados do exemplo são válidos antes de atualizar
+        const schema = JSON.stringify(example.schema, null, 2);
+        const uischema = JSON.stringify(example.uischema, null, 2);
+
+        // Validar se são JSONs válidos
+        JSON.parse(schema);
+        JSON.parse(uischema);
+
+        setEditorSchema(schema);
+        setEditorUischema(uischema);
+        setFormData(example.data || {});
+        setSelected(exampleName);
+      } catch (e) {
+        console.error('Erro ao carregar exemplo:', e);
+      }
     }
   };
 

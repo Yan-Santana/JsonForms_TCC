@@ -3,12 +3,13 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/api';
 import { login } from '../services/auth';
+import { Alert } from '../components/Alert';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState([]);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -30,10 +31,10 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setErrors([]);
 
     if (!isLogin && formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem');
+      setErrors(['As senhas não coincidem']);
       return;
     }
 
@@ -46,20 +47,30 @@ const AuthPage = () => {
         login(response.data.token);
         navigate('/');
       } else {
-        await api.post('/api/auth/register', {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+        const registerData = {
+          name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           password: formData.password,
-          group: formData.group,
-        });
-        alert('Cadastro realizado com sucesso! Você será redirecionado para a página de login.');
-        setIsLogin(true);
+          groupId: formData.group,
+        };
+
+        const response = await api.post('/api/auth/register', registerData);
+
+        if (response.data) {
+          alert('Cadastro realizado com sucesso! Você será redirecionado para a página de login.');
+          setIsLogin(true);
+        }
       }
     } catch (err) {
-      setError(
-        err.response?.data?.error || (isLogin ? 'Erro ao fazer login' : 'Erro ao criar usuário'),
-      );
+      console.error('Erro completo:', err);
+      if (err.response?.data?.message) {
+        const errorMessages = Array.isArray(err.response.data.message)
+          ? err.response.data.message
+          : [err.response.data.message];
+        setErrors(errorMessages);
+      } else {
+        setErrors([isLogin ? 'Erro ao fazer login' : 'Erro ao criar usuário']);
+      }
     }
   };
 
@@ -88,10 +99,8 @@ const AuthPage = () => {
           </p>
         </div>
 
-        {error && (
-          <div className='mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm'>
-            {error}
-          </div>
+        {errors.length > 0 && (
+          <Alert type='error' messages={errors} onClose={() => setErrors([])} />
         )}
 
         {/* Form */}
