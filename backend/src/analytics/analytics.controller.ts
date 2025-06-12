@@ -83,6 +83,68 @@ export class AnalyticsController {
       },
     ];
 
+    // Função de CDF normal padrão
+    function erf(x: number): number {
+      // aproximação de Abramowitz e Stegun
+      const sign = x >= 0 ? 1 : -1;
+      x = Math.abs(x);
+      const a1 = 0.254829592;
+      const a2 = -0.284496736;
+      const a3 = 1.421413741;
+      const a4 = -1.453152027;
+      const a5 = 1.061405429;
+      const p = 0.3275911;
+      const t = 1 / (1 + p * x);
+      const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+      return sign * y;
+    }
+    function normalCdf(z: number): number {
+      return (1.0 + erf(z / Math.sqrt(2))) / 2.0;
+    }
+
+    // Função simples de Mann-Whitney U
+    function mannWhitneyUTest(a: number[], b: number[]): number {
+      const all = [...a.map((v) => ({ v, g: 'a' })), ...b.map((v) => ({ v, g: 'b' }))].sort(
+        (x, y) => x.v - y.v,
+      );
+      let rank = 1;
+      let last = null;
+      let sumRanksA = 0;
+      let countA = 0;
+      for (const item of all) {
+        if (last !== null && item.v !== last) rank++;
+        if (item.g === 'a') {
+          sumRanksA += rank;
+          countA++;
+        }
+        last = item.v;
+      }
+      const U1 = sumRanksA - (countA * (countA + 1)) / 2;
+      const n1 = a.length;
+      const n2 = b.length;
+      const mu = (n1 * n2) / 2;
+      const sigma = Math.sqrt((n1 * n2 * (n1 + n2 + 1)) / 12);
+      const z = (U1 - mu) / sigma;
+      const p = 2 * (1 - normalCdf(Math.abs(z)));
+      return p;
+    }
+
+    // Coletar dados dos usuários dos dois grupos para os testes
+    const usersA = await this.analyticsService.getUsersByGroup('Grupo A');
+    const usersB = await this.analyticsService.getUsersByGroup('Grupo B');
+
+    // Resets de código
+    const resetsA = usersA.map((u) => u.codeResets || 0);
+    const resetsB = usersB.map((u) => u.codeResets || 0);
+    const pResets = mannWhitneyUTest(resetsA, resetsB);
+    const significanciaResets = pResets < 0.05 ? 'p < 0.05' : 'n.s.';
+
+    // Primeira tentativa (em ms)
+    const firstA = usersA.map((u) => u.firstAttemptTime || 0).filter((x) => x > 0);
+    const firstB = usersB.map((u) => u.firstAttemptTime || 0).filter((x) => x > 0);
+    const pFirst = firstA.length > 1 && firstB.length > 1 ? mannWhitneyUTest(firstA, firstB) : 1;
+    const significanciaFirst = pFirst < 0.05 ? 'p < 0.05' : 'n.s.';
+
     return {
       analytics: {
         groupA: groupAAnalytics,
@@ -146,7 +208,7 @@ export class AnalyticsController {
             grupoA: `${groupAAnalytics.codeResets}`,
             grupoB: `${groupBAnalytics.codeResets}`,
             diferenca: `${Math.round(resetsComparison * 100)}%`,
-            significancia: 'p < 0.05',
+            significancia: significanciaResets,
           },
           {
             metrica: 'Primeira Tentativa',
@@ -157,7 +219,7 @@ export class AnalyticsController {
               Math.round(groupBAnalytics.averageFirstAttemptTime),
             ),
             diferenca: `${Math.round(firstAttemptComparison * 100)}%`,
-            significancia: 'p < 0.05',
+            significancia: significanciaFirst,
           },
         ],
         firstAttemptTime: {

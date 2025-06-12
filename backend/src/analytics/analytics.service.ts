@@ -371,4 +371,8 @@ export class AnalyticsService {
       await this.userRepository.save(user);
     }
   }
+
+  async getUsersByGroup(groupId: string): Promise<User[]> {
+    return this.userRepository.find({ where: { groupId: groupId as UserGroup } });
+  }
 }
