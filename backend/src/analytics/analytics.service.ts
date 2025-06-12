@@ -9,13 +9,13 @@ interface UserSpeed {
 }
 
 interface GroupAnalytics {
-  averageSubmissions: number;
-  averageSchemaEdits: number;
-  averageUiSchemaEdits: number;
-  averageTimeSpent: number;
+  totalSubmissions: number;
+  totalSchemaEdits: number;
+  totalUiSchemaEdits: number;
+  totalTimeSpent: number;
   medianTimeSpent: number;
-  averageErrorCount: number;
-  averageFormErrors: number;
+  totalErrorCount: number;
+  totalFormErrors: number;
   averageFirstAttemptTime: number;
   totalUsers: number;
   codeResets: number;
@@ -105,13 +105,13 @@ export class AnalyticsService {
 
     if (users.length === 0) {
       return {
-        averageSubmissions: 0,
-        averageSchemaEdits: 0,
-        averageUiSchemaEdits: 0,
-        averageTimeSpent: 0,
+        totalSubmissions: 0,
+        totalSchemaEdits: 0,
+        totalUiSchemaEdits: 0,
+        totalTimeSpent: 0,
         medianTimeSpent: 0,
-        averageErrorCount: 0,
-        averageFormErrors: 0,
+        totalErrorCount: 0,
+        totalFormErrors: 0,
         averageFirstAttemptTime: 0,
         totalUsers: 0,
         codeResets: 0,
@@ -129,18 +129,10 @@ export class AnalyticsService {
       .map((user) => Number(user.totalTimeSpent || 0))
       .filter((time) => time > 0);
     const medianTimeSpent = this.calculateMedian(timeSpentValues);
-    const averageTimeSpent =
-      timeSpentValues.length > 0
-        ? timeSpentValues.reduce((sum, time) => sum + time, 0) / timeSpentValues.length
-        : 0;
 
-    // Calcular a média do tempo da primeira tentativa em minutos
+    // Calcular a média do tempo da primeira tentativa em milissegundos
     const firstAttemptValues = usersWithAttempts
-      .map((user) => {
-        const now = Date.now();
-        const attempt = Number(user.firstAttemptTime || 0);
-        return attempt > 0 ? now - attempt : 0;
-      })
+      .map((user) => Number(user.firstAttemptTime || 0))
       .filter((time) => time > 0);
 
     const averageFirstAttemptTime =
@@ -149,18 +141,14 @@ export class AnalyticsService {
         : 0;
 
     return {
-      averageSubmissions:
-        users.reduce((sum, user) => sum + (user.totalSubmissions || 0), 0) / users.length,
-      averageSchemaEdits:
-        users.reduce((sum, user) => sum + (user.schemaEdits || 0), 0) / users.length,
-      averageUiSchemaEdits:
-        users.reduce((sum, user) => sum + (user.uiSchemaEdits || 0), 0) / users.length,
-      averageTimeSpent,
+      totalSubmissions: users.reduce((sum, user) => sum + (user.totalSubmissions || 0), 0),
+      totalSchemaEdits: users.reduce((sum, user) => sum + (user.schemaEdits || 0), 0),
+      totalUiSchemaEdits: users.reduce((sum, user) => sum + (user.uiSchemaEdits || 0), 0),
+      totalTimeSpent:
+        timeSpentValues.length > 0 ? timeSpentValues.reduce((sum, time) => sum + time, 0) : 0,
       medianTimeSpent,
-      averageErrorCount:
-        users.reduce((sum, user) => sum + (user.errorCount || 0), 0) / users.length,
-      averageFormErrors:
-        users.reduce((sum, user) => sum + (user.formErrors || 0), 0) / users.length,
+      totalErrorCount: users.reduce((sum, user) => sum + (user.errorCount || 0), 0),
+      totalFormErrors: users.reduce((sum, user) => sum + (user.formErrors || 0), 0),
       averageFirstAttemptTime,
       totalUsers: users.length,
       codeResets: users.reduce((sum, user) => sum + (user.codeResets || 0), 0),
@@ -185,9 +173,7 @@ export class AnalyticsService {
     const submissionsData = [
       {
         name: 'Submissões Válidas',
-        grupoA: Math.round(
-          users.reduce((sum, user) => sum + (user.totalSubmissions || 0), 0) / users.length,
-        ),
+        grupoA: users.reduce((sum, user) => sum + (user.totalSubmissions || 0), 0),
         grupoB: 0, // Será preenchido no controller
       },
     ];
@@ -195,16 +181,12 @@ export class AnalyticsService {
     const editsData = [
       {
         name: 'Edições de Schema',
-        grupoA: Math.round(
-          users.reduce((sum, user) => sum + (user.schemaEdits || 0), 0) / users.length,
-        ),
+        grupoA: users.reduce((sum, user) => sum + (user.schemaEdits || 0), 0),
         grupoB: 0,
       },
       {
         name: 'Edições de UI',
-        grupoA: Math.round(
-          users.reduce((sum, user) => sum + (user.uiSchemaEdits || 0), 0) / users.length,
-        ),
+        grupoA: users.reduce((sum, user) => sum + (user.uiSchemaEdits || 0), 0),
         grupoB: 0,
       },
     ];
@@ -265,16 +247,12 @@ export class AnalyticsService {
     const errorsData = [
       {
         name: 'Erros de Código',
-        grupoA: Math.round(
-          users.reduce((sum, user) => sum + (user.errorCount || 0), 0) / users.length,
-        ),
+        grupoA: users.reduce((sum, user) => sum + (user.errorCount || 0), 0),
         grupoB: 0,
       },
       {
         name: 'Formulários Inválidos',
-        grupoA: Math.round(
-          users.reduce((sum, user) => sum + (user.formErrors || 0), 0) / users.length,
-        ),
+        grupoA: users.reduce((sum, user) => sum + (user.formErrors || 0), 0),
         grupoB: 0,
       },
     ];
@@ -386,10 +364,10 @@ export class AnalyticsService {
     }
   }
 
-  async registerAttempt(userId: number, timestamp: string): Promise<void> {
+  async registerAttempt(userId: number, elapsed: number): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (user && !user.firstAttemptTime) {
-      user.firstAttemptTime = new Date(timestamp).getTime();
+    if (user) {
+      user.firstAttemptTime = elapsed; // sempre sobrescreve
       await this.userRepository.save(user);
     }
   }

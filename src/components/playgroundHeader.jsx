@@ -68,11 +68,11 @@ const PlaygroundHeader = ({
 
     if (!firstAttemptTime) {
       setFirstAttemptTime(currentTime);
-      // Registrar o tempo da primeira tentativa no backend
+      // Registrar o tempo decorrido até a primeira tentativa no backend
       try {
         await api.post('/api/analytics/attempt', {
           userId: userData.id,
-          timestamp: new Date().toISOString(),
+          elapsed: currentTime - startTime,
         });
       } catch (error) {
         console.error('Erro ao registrar primeira tentativa:', error);

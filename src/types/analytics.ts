@@ -69,6 +69,7 @@ export interface AnalyticsResponse {
     groupB: GroupAnalytics | null;
     comparison: {
       submissions: number | null;
+      edits: number | null;
       timeEfficiency: number | null;
       errorRate: number | null;
     };

@@ -83,7 +83,7 @@ const Dashboard = () => {
               value={`${submissionsData.grupoA} vs ${submissionsData.grupoB}`}
               trend={{
                 value: Math.round((analytics.analytics.comparison?.submissions || 0) * 100),
-                isPositive: true,
+                isPositive: (analytics.analytics.comparison?.submissions || 0) >= 0,
               }}
               description='Total de submissões por grupo'
               icon={<FileText className='h-4 w-4' />}
@@ -92,8 +92,8 @@ const Dashboard = () => {
               title='Edições'
               value={`${editsData.grupoA} vs ${editsData.grupoB}`}
               trend={{
-                value: -31,
-                isPositive: false,
+                value: Math.round((analytics.analytics.comparison?.edits || 0) * 100),
+                isPositive: (analytics.analytics.comparison?.edits || 0) >= 0,
               }}
               description='Total de edições em schemas'
               icon={<BarChart className='h-4 w-4' />}
@@ -105,7 +105,7 @@ const Dashboard = () => {
               }`}
               trend={{
                 value: Math.round((analytics.analytics.comparison?.timeEfficiency || 0) * 100),
-                isPositive: true,
+                isPositive: (analytics.analytics.comparison?.timeEfficiency || 0) >= 0,
               }}
               description='Tempo médio para finalizar'
               icon={<Clock className='h-4 w-4' />}
@@ -115,7 +115,7 @@ const Dashboard = () => {
               value={`${errorsData.grupoA} vs ${errorsData.grupoB}`}
               trend={{
                 value: Math.round((analytics.analytics.comparison?.errorRate || 0) * 100),
-                isPositive: false,
+                isPositive: (analytics.analytics.comparison?.errorRate || 0) >= 0,
               }}
               description='Total de erros ocorridos'
               icon={<Bug className='h-4 w-4' />}

@@ -17,15 +17,16 @@ export class AnalyticsController {
       this.analyticsService.getGroupAnalytics('Grupo B'),
     ]);
 
-    const [groupAChartData, groupBChartData] = await Promise.all([
+    const [_groupAChartData, _groupBChartData] = await Promise.all([
       this.analyticsService.getChartData('Grupo A'),
       this.analyticsService.getChartData('Grupo B'),
     ]);
 
-    // Calcular diferenças percentuais
+    // Calcular diferenças percentuais em relação à média dos dois grupos
     const calculatePercentageDiff = (a: number, b: number) => {
-      if (b === 0) return 0;
-      return (a - b) / b;
+      const avg = (a + b) / 2;
+      if (avg === 0) return 0;
+      return (a - b) / avg;
     };
 
     const firstAttemptComparison = calculatePercentageDiff(
@@ -38,22 +39,70 @@ export class AnalyticsController {
       groupBAnalytics.codeResets,
     );
 
+    // Cálculo das métricas de performance para o radar
+    const maxSubmissions = Math.max(
+      groupAAnalytics.totalSubmissions,
+      groupBAnalytics.totalSubmissions,
+      1,
+    );
+    const maxTime = Math.max(groupAAnalytics.totalTimeSpent, groupBAnalytics.totalTimeSpent, 1);
+    const maxErrors = Math.max(groupAAnalytics.totalErrorCount, groupBAnalytics.totalErrorCount, 1);
+    const maxResets = Math.max(groupAAnalytics.codeResets, groupBAnalytics.codeResets, 1);
+    const maxUsers = Math.max(groupAAnalytics.totalUsers, groupBAnalytics.totalUsers, 1);
+
+    const performanceData = [
+      {
+        subject: 'Eficiência',
+        grupoA: Math.round((groupAAnalytics.totalSubmissions / maxSubmissions) * 100),
+        grupoB: Math.round((groupBAnalytics.totalSubmissions / maxSubmissions) * 100),
+        fullMark: 100,
+      },
+      {
+        subject: 'Velocidade',
+        grupoA: Math.round((1 - groupAAnalytics.totalTimeSpent / maxTime) * 100),
+        grupoB: Math.round((1 - groupBAnalytics.totalTimeSpent / maxTime) * 100),
+        fullMark: 100,
+      },
+      {
+        subject: 'Qualidade',
+        grupoA: Math.round((1 - groupAAnalytics.totalErrorCount / maxErrors) * 100),
+        grupoB: Math.round((1 - groupBAnalytics.totalErrorCount / maxErrors) * 100),
+        fullMark: 100,
+      },
+      {
+        subject: 'Precisão',
+        grupoA: Math.round((1 - groupAAnalytics.codeResets / maxResets) * 100),
+        grupoB: Math.round((1 - groupBAnalytics.codeResets / maxResets) * 100),
+        fullMark: 100,
+      },
+      {
+        subject: 'Consistência',
+        grupoA: Math.round((groupAAnalytics.totalUsers / maxUsers) * 100),
+        grupoB: Math.round((groupBAnalytics.totalUsers / maxUsers) * 100),
+        fullMark: 100,
+      },
+    ];
+
     return {
       analytics: {
         groupA: groupAAnalytics,
         groupB: groupBAnalytics,
         comparison: {
           submissions: calculatePercentageDiff(
-            groupAAnalytics.averageSubmissions,
-            groupBAnalytics.averageSubmissions,
+            groupAAnalytics.totalSubmissions,
+            groupBAnalytics.totalSubmissions,
+          ),
+          edits: calculatePercentageDiff(
+            groupAAnalytics.totalSchemaEdits,
+            groupBAnalytics.totalSchemaEdits,
           ),
           timeEfficiency: calculatePercentageDiff(
-            groupAAnalytics.averageTimeSpent,
-            groupBAnalytics.averageTimeSpent,
+            groupAAnalytics.totalTimeSpent,
+            groupBAnalytics.totalTimeSpent,
           ),
           errorRate: calculatePercentageDiff(
-            groupAAnalytics.averageErrorCount,
-            groupBAnalytics.averageErrorCount,
+            groupAAnalytics.totalErrorCount,
+            groupBAnalytics.totalErrorCount,
           ),
           firstAttempt: firstAttemptComparison,
           resets: resetsComparison,
@@ -63,34 +112,34 @@ export class AnalyticsController {
         submissionsData: [
           {
             name: 'Total',
-            grupoA: groupAChartData.submissionsData[0]?.grupoA || 0,
-            grupoB: groupBChartData.submissionsData[0]?.grupoB || 0,
+            grupoA: groupAAnalytics.totalSubmissions,
+            grupoB: groupBAnalytics.totalSubmissions,
           },
         ],
         editsData: [
           {
             name: 'Schema',
-            grupoA: groupAChartData.editsData[0]?.grupoA || 0,
-            grupoB: groupBChartData.editsData[0]?.grupoB || 0,
+            grupoA: groupAAnalytics.totalSchemaEdits,
+            grupoB: groupBAnalytics.totalSchemaEdits,
           },
         ],
         completionTimeData: [
           {
             name: 'Média',
-            grupoA: groupAAnalytics.averageTimeSpent,
-            grupoB: groupBAnalytics.averageTimeSpent,
-            grupoAFormatted: this.analyticsService.formatTime(groupAAnalytics.averageTimeSpent),
-            grupoBFormatted: this.analyticsService.formatTime(groupBAnalytics.averageTimeSpent),
+            grupoA: groupAAnalytics.totalTimeSpent,
+            grupoB: groupBAnalytics.totalTimeSpent,
+            grupoAFormatted: this.analyticsService.formatTime(groupAAnalytics.totalTimeSpent),
+            grupoBFormatted: this.analyticsService.formatTime(groupBAnalytics.totalTimeSpent),
           },
         ],
         errorsData: [
           {
             name: 'Total',
-            grupoA: groupAChartData.errorsData[0]?.grupoA || 0,
-            grupoB: groupBChartData.errorsData[0]?.grupoB || 0,
+            grupoA: groupAAnalytics.totalErrorCount,
+            grupoB: groupBAnalytics.totalErrorCount,
           },
         ],
-        performanceData: groupAChartData.performanceData,
+        performanceData: performanceData,
         comparisonTable: [
           {
             metrica: 'Resets de Código',
@@ -101,15 +150,23 @@ export class AnalyticsController {
           },
           {
             metrica: 'Primeira Tentativa',
-            grupoA: this.analyticsService.formatTime(groupAAnalytics.averageFirstAttemptTime),
-            grupoB: this.analyticsService.formatTime(groupBAnalytics.averageFirstAttemptTime),
+            grupoA: this.analyticsService.formatTime(
+              Math.round(groupAAnalytics.averageFirstAttemptTime),
+            ),
+            grupoB: this.analyticsService.formatTime(
+              Math.round(groupBAnalytics.averageFirstAttemptTime),
+            ),
             diferenca: `${Math.round(firstAttemptComparison * 100)}%`,
             significancia: 'p < 0.05',
           },
         ],
         firstAttemptTime: {
-          grupoA: this.analyticsService.formatTime(groupAAnalytics.averageFirstAttemptTime),
-          grupoB: this.analyticsService.formatTime(groupBAnalytics.averageFirstAttemptTime),
+          grupoA: this.analyticsService.formatTime(
+            Math.round(groupAAnalytics.averageFirstAttemptTime),
+          ),
+          grupoB: this.analyticsService.formatTime(
+            Math.round(groupBAnalytics.averageFirstAttemptTime),
+          ),
         },
         totalUsers: {
           grupoA: groupAAnalytics.totalUsers,
@@ -150,7 +207,7 @@ export class AnalyticsController {
   @Post('attempt')
   @ApiOperation({ summary: 'Registra o tempo da primeira tentativa' })
   @ApiResponse({ status: 200, description: 'Primeira tentativa registrada com sucesso' })
-  async registerAttempt(@Body() body: { userId: number; timestamp: string }): Promise<void> {
-    return this.analyticsService.registerAttempt(body.userId, body.timestamp);
+  async registerAttempt(@Body() body: { userId: number; elapsed: number }): Promise<void> {
+    return this.analyticsService.registerAttempt(body.userId, body.elapsed);
   }
 }
