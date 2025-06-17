@@ -1,116 +1,166 @@
-# Playground JsonForms - TCC
+# JsonForms Playground
 
-Este projeto é um playground para experimentação e desenvolvimento com JsonForms, uma biblioteca React para criação de formulários dinâmicos baseados em JSON Schema.
+Este projeto é um ambiente completo para experimentação, construção e análise de formulários dinâmicos utilizando React, JsonForms e um backend robusto em NestJS + PostgreSQL. Ele foi desenvolvido como parte de um Trabalho de Conclusão de Curso (TCC).
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Frontend**:
+### Frontend
 
-  - React 19
-  - Vite
-  - JsonForms
-  - Material-UI
-  - Monaco Editor
-  - React Router DOM
+- **React** (com Vite)
+- **JsonForms** - Biblioteca para formulários dinâmicos
+- **TailwindCSS** - Framework CSS
+- **Material-UI** - Componentes de interface
+- **Monaco Editor** - Editor de código para schemas
+- **React Router DOM** - Roteamento
+- **Axios** - Cliente HTTP
 
-- **Backend**:
-  - Node.js
-  - Express
-  - TypeScript
-  - MongoDB
-  - Swagger
-  - Docker
-  - Docker Compose
+### Backend
 
-## 📋 Pré-requisitos
+- **Node.js** + **NestJS** (TypeScript)
+- **TypeORM** - ORM para PostgreSQL
+- **PostgreSQL** - Banco de dados
+- **JWT** - Autenticação
+- **Docker** & **Docker Compose** - Containerização
 
-- Node.js (versão 18 ou superior)
-- Docker e Docker Compose
-- npm ou yarn
-- MongoDB (local ou Atlas)
+## 📦 Estrutura do Projeto
 
-## 🛠️ Instalação
-
-1. Clone o repositório:
-
-```bash
-git clone https://github.com/Yan-Santana/JsonForms_TCC.git
+```
+JsonForms_test/
+├── backend/                    # Backend NestJS
+│   ├── src/
+│   │   ├── analytics/         # Analytics e estatísticas
+│   │   ├── auth/              # Autenticação JWT
+│   │   ├── forms/             # CRUD de formulários
+│   │   ├── users/             # Gerenciamento de usuários
+│   │   ├── migrations/        # Migrações do banco
+│   │   └── main.ts            # Bootstrap da aplicação
+│   └── package.json
+├── src/                       # Frontend React
+│   ├── components/            # Componentes reutilizáveis
+│   │   ├── dashboard/         # Componentes do dashboard
+│   │   └── ui/                # Componentes de interface
+│   ├── pages/                 # Páginas principais
+│   ├── services/              # Integração com API
+│   ├── hooks/                 # Hooks customizados
+│   └── utils/                 # Utilitários
+├── public/                    # Arquivos estáticos
+├── scripts/                   # Scripts utilitários
+└── docker-compose.yml         # Configuração Docker
 ```
 
-2. Instale as dependências do frontend:
+## ⚙️ Como rodar o projeto
 
-```bash
-npm install
-```
+### Com Docker (recomendado)
 
-3. Instale as dependências do backend:
+1. **Clone o repositório:**
 
-```bash
-cd backend
-npm install
-```
+   ```bash
+   git clone https://github.com/Yan-Santana/JsonForms_TCC.git
+   cd JsonForms_test
+   ```
 
-4. Configure as variáveis de ambiente:
+2. **Configure as variáveis de ambiente:**
 
-```bash
-# Frontend
-cp .env.example .env
+   ```bash
+   cp .env.example .env
+   # Edite o arquivo .env conforme necessário
+   ```
 
-# Backend
-cd backend
-cp .env.example .env
-```
+3. **Execute com Docker:**
 
-5. Inicie o ambiente de desenvolvimento:
+   ```bash
+   docker-compose up --build
+   ```
 
-Frontend:
+4. **Acesse a aplicação:**
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend API: [http://localhost:5001/api](http://localhost:5001/api)
+   - Swagger: [http://localhost:5001/api](http://localhost:5001/api)
 
-```bash
-npm run dev
-```
+### Manualmente (sem Docker)
 
-Backend:
+1. **Instale as dependências do frontend:**
 
-```bash
-cd backend
-npm run dev
-```
+   ```bash
+   npm install
+   ```
 
-6. Para desenvolvimento com Docker:
+2. **Instale as dependências do backend:**
 
-```bash
-docker-compose up
-```
+   ```bash
+   cd backend
+   npm install
+   cd ..
+   ```
+
+3. **Configure o banco PostgreSQL** e as variáveis de ambiente
+
+4. **Inicie o backend:**
+
+   ```bash
+   cd backend
+   npm run dev
+   ```
+
+5. **Inicie o frontend (em outro terminal):**
+   ```bash
+   npm run dev
+   ```
 
 ## 📝 Funcionalidades Principais
 
-- Criação e edição de formulários dinâmicos
-- Validação de dados baseada em JSON Schema
-- Interface visual para construção de formulários
-- Integração com Monaco Editor para edição de schemas
-- API REST com documentação Swagger
-- Autenticação de usuários
+### 🎮 Playground de Formulários
+
+- Criação e edição de formulários dinâmicos com JsonForms
+- Editor visual e de código (Monaco Editor) para JSON Schema
+- Validação automática baseada em JSON Schema
+- Preview em tempo real dos formulários
+
+### 📊 Dashboard Analítico
+
+- Visualização de estatísticas de uso dos formulários
+- Gráficos de comparação entre grupos de usuários
+- Métricas de desempenho e tempo de conclusão
+- Análise de erros e tentativas
+
+### 🔐 Sistema de Autenticação
+
+- Cadastro e login de usuários
+- Proteção de rotas com JWT
+- Perfil de usuário
+
+### 🛠️ API RESTful
+
+- Endpoints para CRUD de formulários
+- Sistema de analytics e métricas
+- Gerenciamento de usuários
+- Documentação automática com Swagger
 
 ## 🧪 Scripts Disponíveis
 
-Frontend:
+### Frontend
 
-- `npm run dev` - Inicia o servidor de desenvolvimento
-- `npm run build` - Gera a build de produção
-- `npm run lint` - Executa o linter
-- `npm run preview` - Previa a build de produção
+```bash
+npm run dev          # Inicia servidor de desenvolvimento
+npm run build        # Gera build de produção
+npm run lint         # Executa o linter
+npm run preview      # Previa a build de produção
+```
 
-Backend:
+### Backend
 
-- `npm run dev` - Inicia o servidor em modo desenvolvimento
-- `npm run build` - Compila o TypeScript
-- `npm run start` - Inicia o servidor em produção
-- `npm run watch` - Compila o TypeScript em modo watch
+```bash
+npm run dev          # Inicia servidor em modo desenvolvimento
+npm run build        # Compila o TypeScript
+npm run start        # Inicia servidor em produção
+npm run watch        # Compila em modo watch
+```
 
 ## 📚 Documentação
 
-- [JsonForms](https://jsonforms.io/)
-- [Swagger UI](http://localhost:3001/api-docs) (disponível após iniciar o backend)
+- **JsonForms**: [https://jsonforms.io/](https://jsonforms.io/)
+- **Swagger**: [http://localhost:5001/api](http://localhost:5001/api) (após iniciar o backend)
+- **NestJS**: [https://nestjs.com/](https://nestjs.com/)
 
 ## 🤝 Contribuição
 
@@ -118,4 +168,8 @@ Este projeto é parte de um trabalho de conclusão de curso (TCC). Contribuiçõ
 
 ## 👨‍💻 Autor
 
-Yan G. Santana - yansantana63@gmail.com
+**Yan G. Santana** - yansantana63@gmail.com
+
+---
+
+_Desenvolvido como parte de um TCC sobre Technical writing, formulários dinâmicos e análise de usabilidade._

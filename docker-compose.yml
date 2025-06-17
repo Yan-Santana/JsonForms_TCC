@@ -10,6 +10,7 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=${VITE_API_URL_DOCKER}
+      - DOCKER_ENV=true
     depends_on:
       - backend
     command: sh -c "npm run dev -- --host 0.0.0.0"
