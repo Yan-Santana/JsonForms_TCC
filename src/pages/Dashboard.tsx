@@ -132,12 +132,6 @@ const Dashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className='text-muted-foreground mb-4'>
-                    A análise indica que o{' '}
-                    <span className='font-bold text-purple-600'>Grupo A</span> apresenta melhor
-                    desempenho em 6 das 7 métricas analisadas, com destaque para menos resets (-58%)
-                    e menos erros (-35%).
-                  </p>
                   <div className='grid gap-4 grid-cols-1'>
                     <StatCard
                       title='Resets de Código'
