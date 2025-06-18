@@ -57,7 +57,14 @@ const Dashboard = () => {
 
   // Garantir que os dados necessários existem
   const submissionsData = chartData.submissionsData[0] || { grupoA: 0, grupoB: 0 };
-  const editsData = chartData.editsData[0] || { grupoA: 0, grupoB: 0 };
+
+  // Calcular total de edições (schema + uischema)
+  const totalSchemaEditsA =
+    chartData.editsData?.reduce((sum, item) => sum + (item.grupoA || 0), 0) || 0;
+  const totalSchemaEditsB =
+    chartData.editsData?.reduce((sum, item) => sum + (item.grupoB || 0), 0) || 0;
+  const editsData = { grupoA: totalSchemaEditsA, grupoB: totalSchemaEditsB };
+
   const completionTimeData = chartData.completionTimeData[0] || {
     grupoA: 0,
     grupoB: 0,
@@ -67,6 +74,81 @@ const Dashboard = () => {
   const errorsData = chartData.errorsData[0] || { grupoA: 0, grupoB: 0 };
   const firstAttemptTime = chartData.firstAttemptTime || { grupoA: '0 min', grupoB: '0 min' };
   const totalUsers = chartData.totalUsers || { grupoA: 0, grupoB: 0 };
+
+  // Determinar qual grupo teve melhor desempenho
+  const determineBestGroup = () => {
+    const submissionsA = submissionsData.grupoA || 0;
+    const submissionsB = submissionsData.grupoB || 0;
+    const editsA = editsData.grupoA || 0;
+    const editsB = editsData.grupoB || 0;
+    const timeA = completionTimeData.grupoA || 0;
+    const timeB = completionTimeData.grupoB || 0;
+    const errorsA = errorsData.grupoA || 0;
+    const errorsB = errorsData.grupoB || 0;
+    const resetsA = analytics.analytics.groupA?.codeResets || 0;
+    const resetsB = analytics.analytics.groupB?.codeResets || 0;
+
+    // Pontuação baseada em múltiplas métricas
+    let scoreA = 0;
+    let scoreB = 0;
+
+    // Submissões (mais é melhor)
+    if (submissionsA > submissionsB) scoreA += 1;
+    else if (submissionsB > submissionsA) scoreB += 1;
+
+    // Edições (menos é melhor) - Peso maior
+    if (editsA < editsB) scoreA += 3;
+    else if (editsB < editsA) scoreB += 3;
+
+    // Tempo (menos é melhor)
+    if (timeA < timeB) scoreA += 2;
+    else if (timeB < timeA) scoreB += 2;
+
+    // Erros (menos é melhor) - Peso maior
+    if (errorsA < errorsB) scoreA += 4;
+    else if (errorsB < errorsA) scoreB += 4;
+
+    // Resets (menos é melhor)
+    if (resetsA < resetsB) scoreA += 2;
+    else if (resetsB < resetsA) scoreB += 2;
+
+    return scoreA > scoreB ? 'A' : scoreB > scoreA ? 'B' : 'tie';
+  };
+
+  const bestGroup = determineBestGroup();
+  const isGroupABetter = bestGroup === 'A';
+  const isGroupBBetter = bestGroup === 'B';
+  const isTie = bestGroup === 'tie';
+
+  // Obter dados do grupo vencedor
+  const getWinningGroupData = () => {
+    if (isGroupABetter) {
+      return {
+        name: 'Grupo A',
+        color: 'text-purple-600',
+        submissions: submissionsData.grupoA || 0,
+        edits: editsData.grupoA || 0,
+        timeEfficiency: analytics.analytics.comparison?.timeEfficiency || 0,
+        errorRate: analytics.analytics.comparison?.errorRate || 0,
+        resets: analytics.analytics.groupA?.codeResets || 0,
+        errors: errorsData.grupoA || 0,
+      };
+    } else if (isGroupBBetter) {
+      return {
+        name: 'Grupo B',
+        color: 'text-pink-600',
+        submissions: submissionsData.grupoB || 0,
+        edits: editsData.grupoB || 0,
+        timeEfficiency: -(analytics.analytics.comparison?.timeEfficiency || 0),
+        errorRate: -(analytics.analytics.comparison?.errorRate || 0),
+        resets: analytics.analytics.groupB?.codeResets || 0,
+        errors: errorsData.grupoB || 0,
+      };
+    }
+    return null;
+  };
+
+  const winningGroup = getWinningGroupData();
 
   return (
     <div className='h-screen flex flex-col'>
@@ -140,7 +222,14 @@ const Dashboard = () => {
                       }`}
                       description='Total de resets por grupo'
                       icon={<Timer className='h-4 w-4' />}
-                      trend={{ value: 58, isPositive: false }}
+                      trend={{
+                        value:
+                          analytics.analytics.groupA?.codeResets === 0 &&
+                          analytics.analytics.groupB?.codeResets === 0
+                            ? 0
+                            : Math.round((analytics.analytics.comparison?.resets || 0) * 100),
+                        isPositive: (analytics.analytics.comparison?.resets || 0) >= 0,
+                      }}
                     />
                     <StatCard
                       title='Primeira Tentativa'
@@ -220,32 +309,89 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className='space-y-4'>
-                <p>
-                  Com base nas métricas analisadas, podemos concluir que o{' '}
-                  <span className='font-bold text-purple-600'>Grupo A</span> apresentou um
-                  desempenho significativamente superior ao{' '}
-                  <span className='font-bold text-pink-600'>Grupo B</span> na maioria dos
-                  indicadores:
-                </p>
-                <ul className='list-disc pl-6 space-y-2'>
-                  <li>
-                    <strong>Eficiência:</strong> O Grupo A conseguiu realizar mais submissões (
-                    {Math.round((analytics.analytics.comparison?.submissions || 0) * 100)}%) com
-                    menos edições em schemas (
-                    {Math.round((analytics.analytics.comparison?.timeEfficiency || 0) * 100)}% em
-                    média).
-                  </li>
-                  <li>
-                    <strong>Velocidade:</strong> O tempo médio até a conclusão foi{' '}
-                    {Math.round((analytics.analytics.comparison?.timeEfficiency || 0) * 100)}% menor
-                    no Grupo A.
-                  </li>
-                  <li>
-                    <strong>Qualidade:</strong> O Grupo A apresentou{' '}
-                    {Math.round((analytics.analytics.comparison?.errorRate || 0) * 100)}% menos
-                    erros.
-                  </li>
-                </ul>
+                {isTie ? (
+                  <>
+                    <p>
+                      Com base nas métricas analisadas, ambos os grupos apresentaram{' '}
+                      <span className='font-bold text-blue-600'>desempenho similar</span> nos
+                      indicadores avaliados:
+                    </p>
+                    <ul className='list-disc pl-6 space-y-2'>
+                      <li>
+                        <strong>Submissões:</strong> Grupo A: {submissionsData.grupoA}, Grupo B:{' '}
+                        {submissionsData.grupoB}
+                      </li>
+                      <li>
+                        <strong>Edições:</strong> Grupo A: {editsData.grupoA}, Grupo B:{' '}
+                        {editsData.grupoB}
+                      </li>
+                      <li>
+                        <strong>Tempo:</strong> Grupo A: {completionTimeData.grupoAFormatted}, Grupo
+                        B: {completionTimeData.grupoBFormatted}
+                      </li>
+                      <li>
+                        <strong>Erros:</strong> Grupo A: {errorsData.grupoA}, Grupo B:{' '}
+                        {errorsData.grupoB}
+                      </li>
+                      <li>
+                        <strong>Resets:</strong> Grupo A: {analytics.analytics.groupA?.codeResets},
+                        Grupo B: {analytics.analytics.groupB?.codeResets}
+                      </li>
+                    </ul>
+                  </>
+                ) : (
+                  <p>
+                    Com base nas métricas analisadas, podemos concluir que o{' '}
+                    <span className={`font-bold ${winningGroup?.color}`}>{winningGroup?.name}</span>{' '}
+                    apresentou um desempenho significativamente superior ao{' '}
+                    <span
+                      className={`font-bold ${
+                        winningGroup?.name === 'Grupo A' ? 'text-pink-600' : 'text-purple-600'
+                      }`}
+                    >
+                      {winningGroup?.name === 'Grupo A' ? 'Grupo B' : 'Grupo A'}
+                    </span>{' '}
+                    na maioria dos indicadores:
+                  </p>
+                )}
+
+                {!isTie && winningGroup && (
+                  <ul className='list-disc pl-6 space-y-2'>
+                    <li>
+                      <strong>Eficiência:</strong> O {winningGroup.name} conseguiu realizar{' '}
+                      {winningGroup.submissions} submissões vs{' '}
+                      {winningGroup.name === 'Grupo A'
+                        ? submissionsData.grupoB
+                        : submissionsData.grupoA}{' '}
+                      do outro grupo.
+                    </li>
+                    <li>
+                      <strong>Edições:</strong> O {winningGroup.name} fez {winningGroup.edits}{' '}
+                      edições vs{' '}
+                      {winningGroup.name === 'Grupo A' ? editsData.grupoB : editsData.grupoA} do
+                      outro grupo.
+                    </li>
+                    <li>
+                      <strong>Velocidade:</strong> O tempo médio até a conclusão foi{' '}
+                      {Math.abs(Math.round(winningGroup.timeEfficiency * 100))}%{' '}
+                      {winningGroup.timeEfficiency > 0 ? 'menor' : 'maior'} no {winningGroup.name}.
+                    </li>
+                    <li>
+                      <strong>Qualidade:</strong> O {winningGroup.name} apresentou{' '}
+                      {winningGroup.errors} erros vs{' '}
+                      {winningGroup.name === 'Grupo A' ? errorsData.grupoB : errorsData.grupoA} do
+                      outro grupo.
+                    </li>
+                    <li>
+                      <strong>Resets:</strong> O {winningGroup.name} fez {winningGroup.resets}{' '}
+                      resets vs{' '}
+                      {winningGroup.name === 'Grupo A'
+                        ? analytics.analytics.groupB?.codeResets
+                        : analytics.analytics.groupA?.codeResets}{' '}
+                      do outro grupo.
+                    </li>
+                  </ul>
+                )}
               </div>
             </CardContent>
           </Card>

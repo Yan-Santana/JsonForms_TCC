@@ -124,6 +124,13 @@ const PlaygroundHeader = ({
     try {
       const formData = getData();
       if (!formData) {
+        // Registrar erro de JSON inválido
+        await api.post('/api/analytics/error', {
+          userId: userData.id,
+          errorType: 'invalid_json',
+          timestamp: new Date().toISOString(),
+        });
+
         setSnackbar({
           open: true,
           message: 'JSON inválido no editor',
@@ -144,7 +151,6 @@ const PlaygroundHeader = ({
         await api.post('/api/analytics/error', {
           userId: userData.id,
           errorType: 'render_error',
-          formName: selected,
           timestamp: new Date().toISOString(),
         });
 
@@ -159,6 +165,13 @@ const PlaygroundHeader = ({
       // Validar dados
       const validationErrors = validateFormData(formData);
       if (validationErrors.length > 0) {
+        // Registrar erro de validação
+        await api.post('/api/analytics/error', {
+          userId: userData.id,
+          errorType: 'validation_error',
+          timestamp: new Date().toISOString(),
+        });
+
         setSnackbar({
           open: true,
           message: 'Erros de validação encontrados:\n' + validationErrors.join('\n'),
@@ -195,6 +208,14 @@ const PlaygroundHeader = ({
       }
     } catch (error) {
       console.error('Erro:', error);
+
+      // Registrar erro de conexão
+      await api.post('/api/analytics/error', {
+        userId: userData.id,
+        errorType: 'connection_error',
+        timestamp: new Date().toISOString(),
+      });
+
       setSnackbar({
         open: true,
         message: error.response?.data?.message || 'Erro ao conectar com o servidor',

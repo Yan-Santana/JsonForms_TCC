@@ -75,7 +75,11 @@ export class FormsService {
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (user) {
-      user.schemaEdits = (user.schemaEdits || 0) + 1;
+      if (schemaData.editType === 'schema') {
+        user.schemaEdits = (user.schemaEdits || 0) + 1;
+      } else if (schemaData.editType === 'uischema') {
+        user.uiSchemaEdits = (user.uiSchemaEdits || 0) + 1;
+      }
       await this.userRepository.save(user);
     }
   }

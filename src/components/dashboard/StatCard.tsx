@@ -29,7 +29,7 @@ export function StatCard({ title, value, description, icon, trend, className }: 
               {trend.isPositive ? '+' : '-'}
               {Math.abs(trend.value)}%
             </span>
-            <span className='text-muted-foreground'>comparado à média</span>
+            <span className='text-muted-foreground'>vs Grupo B</span>
           </div>
         )}
       </CardContent>

@@ -11,4 +11,4 @@ import { User } from '../users/entities/user.entity';
   controllers: [AnalyticsController],
   exports: [AnalyticsService],
 })
-export class AnalyticsModule {} 
+export class AnalyticsModule {}

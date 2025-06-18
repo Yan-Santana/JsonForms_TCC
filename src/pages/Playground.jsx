@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Grid, Tabs, Tab, Paper } from '@mui/material';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Grid, Tabs, Tab, Paper, Box } from '@mui/material';
 import PlaygroundHeader from '../components/playgroundHeader';
 import CodeEditor from '../components/editor';
 import FormPreview from '../components/formPreview';
 import TabPanel from '../components/tabPanel';
+import api from '../config/api';
 
 // Importa todos os arquivos .jsx da pasta utils
 const modules = import.meta.glob('../utils/*.jsx', { eager: true });
@@ -22,6 +23,93 @@ function Playground() {
   const [formData, setFormData] = useState(initialExample.data || {});
   const [selected, setSelected] = useState(initialExample.name);
   const [tabIndex, setTabIndex] = useState(0);
+  const [userData, setUserData] = useState(null);
+  const [errors, setErrors] = useState([]);
+
+  // Refs para debounce
+  const schemaEditTimeoutRef = useRef(null);
+  const uischemaEditTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    // Buscar dados do usuário
+    const fetchUserData = async () => {
+      try {
+        const response = await api.get('/api/auth/profile');
+        setUserData(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  const registerReset = async (type) => {
+    if (!userData) return;
+
+    try {
+      await api.post('/api/analytics/reset', {
+        userId: userData.id,
+        timestamp: new Date().toISOString(),
+        resetType: type, // 'schema', 'uischema', ou 'example'
+      });
+    } catch (error) {
+      console.error('Erro ao registrar reset:', error);
+    }
+  };
+
+  const registerError = async (type) => {
+    if (!userData) return;
+
+    try {
+      await api.post('/api/analytics/error', {
+        userId: userData.id,
+        errorType: type,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Erro ao registrar erro:', error);
+    }
+  };
+
+  const registerSchemaEdit = async (type) => {
+    if (!userData) {
+      return;
+    }
+
+    try {
+      // Validar se os JSONs são válidos antes de enviar
+      let parsedSchema, parsedUiSchema;
+
+      try {
+        parsedSchema = JSON.parse(editorSchema);
+      } catch (error) {
+        console.log('Schema JSON inválido, não registrando edição');
+        // Registrar erro de JSON inválido
+        registerError('invalid_json');
+        return;
+      }
+
+      try {
+        parsedUiSchema = JSON.parse(editorUischema);
+      } catch (error) {
+        console.log('UI Schema JSON inválido, não registrando edição');
+        // Registrar erro de JSON inválido
+        registerError('invalid_json');
+        return;
+      }
+
+      const response = await api.post('/api/forms/schema', {
+        userId: userData.id,
+        formName: selected,
+        schema: parsedSchema,
+        uiSchema: parsedUiSchema,
+        editType: type,
+      });
+    } catch (error) {
+      console.error('Erro ao registrar edição de schema:', error);
+      console.error('Detalhes do erro:', error.response?.data);
+    }
+  };
 
   const handleGetData = useCallback(() => {
     try {
@@ -91,10 +179,67 @@ function Playground() {
         setEditorUischema(uischema);
         setFormData(example.data || {});
         setSelected(exampleName);
+
+        // Registrar reset de exemplo
+        registerReset('example');
       } catch (e) {
         console.error('Erro ao carregar exemplo:', e);
       }
     }
+  };
+
+  const handleSchemaReset = () => {
+    const example = examples.find((ex) => ex.name === selected);
+    if (example) {
+      setEditorSchema(JSON.stringify(example.schema, null, 2));
+      registerReset('schema');
+    }
+  };
+
+  const handleUiSchemaReset = () => {
+    const example = examples.find((ex) => ex.name === selected);
+    if (example) {
+      setEditorUischema(JSON.stringify(example.uischema, null, 2));
+      registerReset('uischema');
+    }
+  };
+
+  const handleSchemaChange = (value) => {
+    setEditorSchema(value);
+
+    // Limpar timeout anterior
+    if (schemaEditTimeoutRef.current) {
+      clearTimeout(schemaEditTimeoutRef.current);
+    }
+
+    // Validar JSON antes de agendar o registro
+    try {
+      JSON.parse(value);
+      // Registrar edição de schema após 2 segundos de inatividade
+      schemaEditTimeoutRef.current = setTimeout(() => {
+        registerSchemaEdit('schema');
+      }, 2000);
+    } catch (error) {
+      console.log('Schema JSON inválido, não agendando registro');
+    }
+  };
+
+  const handleUiSchemaChange = (value) => {
+    setEditorUischema(value);
+
+    // Limpar timeout anterior
+    if (uischemaEditTimeoutRef.current) {
+      clearTimeout(uischemaEditTimeoutRef.current);
+    }
+
+    // Registrar edição de uischema após 2 segundos de inatividade
+    uischemaEditTimeoutRef.current = setTimeout(() => {
+      registerSchemaEdit('uischema');
+    }, 3000);
+  };
+
+  const handleFormError = (errorType) => {
+    registerError(errorType);
   };
 
   const currentData = handleGetData();
@@ -107,6 +252,7 @@ function Playground() {
           selected={selected}
           onSelect={handleExampleSelect}
           getData={handleGetData}
+          errors={errors}
         />
 
         <Grid container spacing={3}>
@@ -143,10 +289,20 @@ function Playground() {
               </Tabs>
 
               <TabPanel value={tabIndex} index={0}>
-                <CodeEditor value={editorSchema} onChange={setEditorSchema} />
+                <CodeEditor
+                  value={editorSchema}
+                  onChange={handleSchemaChange}
+                  onReset={handleSchemaReset}
+                  resetLabel='Schema'
+                />
               </TabPanel>
               <TabPanel value={tabIndex} index={1}>
-                <CodeEditor value={editorUischema} onChange={setEditorUischema} />
+                <CodeEditor
+                  value={editorUischema}
+                  onChange={handleUiSchemaChange}
+                  onReset={handleUiSchemaReset}
+                  resetLabel='UI Schema'
+                />
               </TabPanel>
               <TabPanel value={tabIndex} index={2}>
                 <CodeEditor
@@ -178,12 +334,7 @@ function Playground() {
                 uischema={currentData?.uischema || {}}
                 data={formData}
                 onChange={setFormData}
-                onFieldInteraction={(fieldName) => {
-                  // Registrar interação com o campo
-                  if (window.registerFieldInteraction) {
-                    window.registerFieldInteraction(fieldName);
-                  }
-                }}
+                onError={handleFormError}
               />
             </Paper>
           </Grid>

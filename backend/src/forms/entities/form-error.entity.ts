@@ -16,4 +16,4 @@ export class FormError {
 
   @CreateDateColumn()
   timestamp: Date;
-} 
+}

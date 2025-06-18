@@ -356,7 +356,7 @@ export class AnalyticsService {
     }
   }
 
-  async registerReset(userId: number): Promise<void> {
+  async registerReset(userId: number, _resetType?: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (user) {
       user.codeResets = (user.codeResets || 0) + 1;

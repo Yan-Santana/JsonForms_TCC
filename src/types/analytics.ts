@@ -72,6 +72,7 @@ export interface AnalyticsResponse {
       edits: number | null;
       timeEfficiency: number | null;
       errorRate: number | null;
+      resets: number | null;
     };
   };
   chartData: ChartData;

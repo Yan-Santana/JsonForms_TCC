@@ -25,7 +25,12 @@ export class AnalyticsController {
     // Calcular diferenças percentuais em relação à média dos dois grupos
     const calculatePercentageDiff = (a: number, b: number) => {
       const avg = (a + b) / 2;
-      if (avg === 0) return 0;
+      if (avg === 0) {
+        // Se ambos são 0, não há diferença percentual
+        if (a === b) return 0;
+        // Se um é 0 e outro não, retorna 100% ou -100%
+        return a > b ? 1 : -1;
+      }
       return (a - b) / avg;
     };
 
@@ -155,8 +160,8 @@ export class AnalyticsController {
             groupBAnalytics.totalSubmissions,
           ),
           edits: calculatePercentageDiff(
-            groupAAnalytics.totalSchemaEdits,
-            groupBAnalytics.totalSchemaEdits,
+            groupAAnalytics.totalSchemaEdits + groupAAnalytics.totalUiSchemaEdits,
+            groupBAnalytics.totalSchemaEdits + groupBAnalytics.totalUiSchemaEdits,
           ),
           timeEfficiency: calculatePercentageDiff(
             groupAAnalytics.totalTimeSpent,
@@ -183,6 +188,11 @@ export class AnalyticsController {
             name: 'Schema',
             grupoA: groupAAnalytics.totalSchemaEdits,
             grupoB: groupBAnalytics.totalSchemaEdits,
+          },
+          {
+            name: 'UI Schema',
+            grupoA: groupAAnalytics.totalUiSchemaEdits,
+            grupoB: groupBAnalytics.totalUiSchemaEdits,
           },
         ],
         completionTimeData: [
@@ -255,8 +265,8 @@ export class AnalyticsController {
   @Post('reset')
   @ApiOperation({ summary: 'Registra um reset de código' })
   @ApiResponse({ status: 200, description: 'Reset registrado com sucesso' })
-  async registerReset(@Body() body: { userId: number; timestamp: string }) {
-    return this.analyticsService.registerReset(body.userId);
+  async registerReset(@Body() body: { userId: number; timestamp: string; resetType?: string }) {
+    return this.analyticsService.registerReset(body.userId, body.resetType);
   }
 
   @Post('error')
