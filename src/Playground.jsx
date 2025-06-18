@@ -120,7 +120,7 @@ function Playground() {
               <Box
                 component='pre'
                 sx={{
-                  backgroundColor: '#f5f5f5',
+                  backgroundColor: 'hsl(var(--background))',
                   p: 2,
                   borderRadius: 2,
                   fontSize: 14,

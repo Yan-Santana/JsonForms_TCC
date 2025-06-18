@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { STYLES, SNACKBAR_DURATION } from '../styles/headerStyles';
 import { validateFormData } from '../pages/formValidation.jsx';
 import api from '../config/api';
+import { LayoutDashboard } from 'lucide-react';
 
 const PlaygroundHeader = ({
   examples,
@@ -270,6 +271,20 @@ const PlaygroundHeader = ({
         </Button>
         <Button onClick={handleLogout} sx={STYLES.header.logoutButton}>
           SAIR
+        </Button>
+        <Button
+          onClick={() => navigate('/analytics')}
+          sx={{
+            ...STYLES.header.logoutButton,
+            bgcolor: '#23272f',
+            color: '#9b87f5',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+          title='Ir para Dashboard Learning Analytics'
+        >
+          <LayoutDashboard className='h-5 w-5' />
         </Button>
       </Box>
       <Snackbar

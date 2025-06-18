@@ -245,7 +245,7 @@ function Playground() {
   const currentData = handleGetData();
 
   return (
-    <div className='min-h-screen bg-[#1A1F2C] text-white'>
+    <div className='min-h-screen bg-background text-white'>
       <div className='p-8'>
         <PlaygroundHeader
           examples={examples}
@@ -260,7 +260,7 @@ function Playground() {
             <Paper
               elevation={3}
               sx={{
-                backgroundColor: '#221F26',
+                backgroundColor: 'hsl(var(--background))',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '12px',
                 overflow: 'hidden',
@@ -323,7 +323,7 @@ function Playground() {
             <Paper
               elevation={3}
               sx={{
-                backgroundColor: '#221F26',
+                backgroundColor: 'hsl(var(--background))',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '12px',
                 padding: '24px',
