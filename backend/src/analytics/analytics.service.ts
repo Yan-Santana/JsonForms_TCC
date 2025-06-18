@@ -225,7 +225,7 @@ export class AnalyticsService {
         grupoA: sortedBySpeed[0] ? Math.round(Number(sortedBySpeed[0].firstAttemptTime)) : 0,
         grupoB: 0,
         grupoAFormatted: sortedBySpeed[0]
-          ? this.formatTime(Date.now() - Number(sortedBySpeed[0].firstAttemptTime))
+          ? this.formatTime(Number(sortedBySpeed[0].firstAttemptTime))
           : '0:00',
         grupoBFormatted: '0:00',
       },
@@ -236,9 +236,7 @@ export class AnalyticsService {
           : 0,
         grupoB: 0,
         grupoAFormatted: sortedBySpeed[sortedBySpeed.length - 1]
-          ? this.formatTime(
-              Date.now() - Number(sortedBySpeed[sortedBySpeed.length - 1].firstAttemptTime),
-            )
+          ? this.formatTime(Number(sortedBySpeed[sortedBySpeed.length - 1].firstAttemptTime))
           : '0:00',
         grupoBFormatted: '0:00',
       },
@@ -330,9 +328,8 @@ export class AnalyticsService {
       firstAttemptTime: {
         grupoA: this.formatTime(
           usersWithAttempts.reduce((sum, user) => {
-            const now = Date.now();
             const attempt = Number(user.firstAttemptTime || 0);
-            return sum + (attempt > 0 ? now - attempt : 0);
+            return sum + attempt;
           }, 0) / usersWithAttempts.length,
         ),
         grupoB: '0:00',
@@ -366,8 +363,9 @@ export class AnalyticsService {
 
   async registerAttempt(userId: number, elapsed: number): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (user) {
-      user.firstAttemptTime = elapsed; // sempre sobrescreve
+    if (user && user.firstAttemptTime === 0) {
+      // Só registra se ainda não foi registrado (firstAttemptTime === 0)
+      user.firstAttemptTime = elapsed;
       await this.userRepository.save(user);
     }
   }

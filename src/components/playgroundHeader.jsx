@@ -68,15 +68,6 @@ const PlaygroundHeader = ({
 
     if (!firstAttemptTime) {
       setFirstAttemptTime(currentTime);
-      // Registrar o tempo decorrido até a primeira tentativa no backend
-      try {
-        await api.post('/api/analytics/attempt', {
-          userId: userData.id,
-          elapsed: currentTime - startTime,
-        });
-      } catch (error) {
-        console.error('Erro ao registrar primeira tentativa:', error);
-      }
     }
   };
 
@@ -178,6 +169,15 @@ const PlaygroundHeader = ({
           severity: 'error',
         });
         return;
+      }
+
+      // Registrar o tempo da primeira tentativa se ainda não foi registrado
+      if (firstAttemptTime && startTime) {
+        const elapsedTime = Date.now() - startTime;
+        await api.post('/api/analytics/attempt', {
+          userId: userData.id,
+          elapsed: elapsedTime,
+        });
       }
 
       const requestData = {

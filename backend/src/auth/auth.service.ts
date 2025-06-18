@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +15,9 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<{ user: User; token: string }> {
-    const existingUser = await this.userRepository.findOne({ where: { email: createUserDto.email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
     if (existingUser) {
       throw new UnauthorizedException('Usuário já existe');
     }
@@ -58,4 +60,4 @@ export class AuthService {
     }
     return user;
   }
-} 
+}
