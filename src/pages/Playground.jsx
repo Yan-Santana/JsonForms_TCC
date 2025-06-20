@@ -245,7 +245,7 @@ function Playground() {
   const currentData = handleGetData();
 
   return (
-    <div className='min-h-screen bg-background text-white'>
+    <div className='min-h-screen bg-background text-white overflow-x-hidden overflow-y-auto'>
       <div className='p-8'>
         <PlaygroundHeader
           examples={examples}
@@ -264,6 +264,8 @@ function Playground() {
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '12px',
                 overflow: 'hidden',
+                maxHeight: '90vh',
+                overflowY: 'auto',
               }}
             >
               <Tabs
@@ -327,6 +329,8 @@ function Playground() {
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '12px',
                 padding: '24px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
               }}
             >
               <FormPreview

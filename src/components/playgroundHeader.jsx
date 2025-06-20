@@ -7,6 +7,7 @@ import {
   Button,
   Snackbar,
   Alert,
+  Paper,
 } from '@mui/material';
 import { logout, getProfile } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +31,9 @@ const PlaygroundHeader = ({
   const [isStarted, setIsStarted] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const [firstAttemptTime, setFirstAttemptTime] = useState(null);
+
+  // Encontrar o exemplo selecionado para obter a introdução
+  const selectedExample = examples.find((ex) => ex.name === selected);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -235,58 +239,91 @@ const PlaygroundHeader = ({
   };
 
   return (
-    <Box display='flex' alignItems='center' justifyContent='space-between' mb={3}>
-      <Typography variant='h4' fontWeight='bold' className='title-effect' sx={STYLES.header.title}>
-        JSON Form Playground
-      </Typography>
-      <Box display='flex' alignItems='center' gap={2}>
-        <FormControl size='small' sx={{ minWidth: 200 }}>
-          <Select
-            value={selected}
-            onChange={(e) => handleExampleChange(e.target.value)}
-            sx={STYLES.header.select}
+    <Box>
+      <Box display='flex' alignItems='center' justifyContent='space-between' mb={3}>
+        <Typography
+          variant='h4'
+          fontWeight='bold'
+          className='title-effect'
+          sx={STYLES.header.title}
+        >
+          JSON Form Playground
+        </Typography>
+        <Box display='flex' alignItems='center' gap={2}>
+          <FormControl size='small' sx={{ minWidth: 200 }}>
+            <Select
+              value={selected}
+              onChange={(e) => handleExampleChange(e.target.value)}
+              sx={STYLES.header.select}
+            >
+              {examples.map((ex) => (
+                <MenuItem key={ex.name} value={ex.name}>
+                  {ex.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            onClick={handleStart}
+            disabled={isStarted}
+            sx={{
+              ...STYLES.header.submitButton,
+              bgcolor: isStarted ? 'grey.500' : 'success.main',
+              '&:hover': {
+                bgcolor: isStarted ? 'grey.600' : 'success.dark',
+              },
+            }}
           >
-            {examples.map((ex) => (
-              <MenuItem key={ex.name} value={ex.name}>
-                {ex.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Button
-          onClick={handleStart}
-          disabled={isStarted}
-          sx={{
-            ...STYLES.header.submitButton,
-            bgcolor: isStarted ? 'grey.500' : 'success.main',
-            '&:hover': {
-              bgcolor: isStarted ? 'grey.600' : 'success.dark',
-            },
-          }}
-        >
-          {isStarted ? 'INICIADO' : 'INICIAR'}
-        </Button>
-        <Button onClick={handleSubmit} disabled={!isStarted} sx={STYLES.header.submitButton}>
-          ENVIAR
-        </Button>
-        <Button onClick={handleLogout} sx={STYLES.header.logoutButton}>
-          SAIR
-        </Button>
-        <Button
-          onClick={() => navigate('/analytics')}
-          sx={{
-            ...STYLES.header.logoutButton,
-            bgcolor: '#23272f',
-            color: '#9b87f5',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-          }}
-          title='Ir para Dashboard Learning Analytics'
-        >
-          <LayoutDashboard className='h-5 w-5' />
-        </Button>
+            {isStarted ? 'INICIADO' : 'INICIAR'}
+          </Button>
+          <Button onClick={handleSubmit} disabled={!isStarted} sx={STYLES.header.submitButton}>
+            ENVIAR
+          </Button>
+          <Button onClick={handleLogout} sx={STYLES.header.logoutButton}>
+            SAIR
+          </Button>
+          <Button
+            onClick={() => navigate('/analytics')}
+            sx={{
+              ...STYLES.header.logoutButton,
+              bgcolor: '#23272f',
+              color: '#9b87f5',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}
+            title='Ir para Dashboard Learning Analytics'
+          >
+            <LayoutDashboard className='h-5 w-5' />
+          </Button>
+        </Box>
       </Box>
+
+      {/* Exibir introdução do teste se existir */}
+      {selectedExample?.introduction && (
+        <Paper
+          elevation={2}
+          sx={{
+            backgroundColor: 'hsl(var(--background))',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '16px',
+          }}
+        >
+          <Typography
+            variant='body1'
+            sx={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-line',
+            }}
+          >
+            {selectedExample.introduction}
+          </Typography>
+        </Paper>
+      )}
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={SNACKBAR_DURATION}

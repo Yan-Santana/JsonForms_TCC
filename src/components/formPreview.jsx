@@ -58,7 +58,7 @@ const FormPreview = ({ schema, uischema, data, onChange, onError, onFieldInterac
       <Typography variant='h6' gutterBottom sx={{ fontWeight: 'bold' }}>
         Visualização do formulário JSON renderizado
       </Typography>
-      <Box ref={formRef} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: 2 }}>
+      <Box ref={formRef} sx={{ maxHeight: '800px', overflowY: 'auto', pr: 2 }}>
         <JsonForms
           schema={schema}
           uischema={uischema}

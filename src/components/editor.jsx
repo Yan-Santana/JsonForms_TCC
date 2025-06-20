@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react';
 import { Box, Button, Tooltip } from '@mui/material';
 import { RotateCcw, AlertCircle } from 'lucide-react';
 
-const CodeEditor = ({ value, onChange, height = '870px', onReset, resetLabel = 'Reset' }) => {
+const CodeEditor = ({ value, onChange, height = '850px', onReset, resetLabel = 'Reset' }) => {
   const monacoRef = useRef(null);
   const [isJsonValid, setIsJsonValid] = useState(true);
 

@@ -101,6 +101,18 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+
+  html,
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  #root {
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 }
 
 body {
@@ -109,8 +121,7 @@ body {
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 code {
