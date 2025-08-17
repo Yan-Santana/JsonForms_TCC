@@ -172,4 +172,4 @@ Este projeto é parte de um trabalho de conclusão de curso (TCC). Contribuiçõ
 
 ---
 
-_Desenvolvido como parte de um TCC sobre Technical writing, formulários dinâmicos e análise de usabilidade._
+_Desenvolvido como parte do meu TCC sobre Technical writing, formulários dinâmicos e análise de usabilidade._
