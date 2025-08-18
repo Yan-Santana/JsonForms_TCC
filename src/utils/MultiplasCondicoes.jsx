@@ -1,5 +1,5 @@
 export const TesteMultiplasCondicoes = {
-  name: 'Teste 3: Múltiplas Condições',
+  name: 'Teste 2: Múltiplas Condições',
   introduction: `Neste teste, você deve criar um formulário onde um campo aparece baseado em múltiplas condições.
 
 TAREFA: Configure o campo "Detalhes do Evento" para aparecer apenas quando:

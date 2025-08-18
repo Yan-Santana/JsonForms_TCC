@@ -21,8 +21,7 @@ DICA: Use a propriedade "rule" com "effect: HIDE" e uma condição que verifica 
       },
       telefone: {
         type: 'string',
-        title: 'Telefone',
-        pattern: '^\\([0-9]{2}\\) [0-9]{4,5}-[0-9]{4}$',
+        title: 'Telefone',  
       },
     },
     required: ['nome', 'receberLigacoes'],

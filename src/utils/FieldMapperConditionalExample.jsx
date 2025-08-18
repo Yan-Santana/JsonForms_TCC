@@ -1,5 +1,6 @@
 export const SimpleConditionalExample = {
-  name: 'Exemplo if/then/else',
+  name: 'Exemplo utilizando o if/then/else do JSONForms',
+  introduction: `Este é um exemplo de como utilizar o if/then/else do JSONForms para criar um formulário com condições.`,
   schema: {
     type: 'object',
     properties: {
